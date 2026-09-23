@@ -54,12 +54,12 @@ const GROUPS: { title: string; rows: Row[] }[] = [
   },
 ];
 
-export function ResultDetails({ solved }: { solved: SolvedDocument }) {
+export function ResultDetails({ solved, compact = false }: { solved: SolvedDocument; compact?: boolean }) {
   const system = useLab((s) => s.unitSystem);
   const ref = useReferenceResult();
   const r = solved.result;
   return (
-    <div className="grid grid-cols-3 gap-x-6 gap-y-4 max-[1100px]:grid-cols-2 max-[640px]:grid-cols-1" data-testid="result-details">
+    <div className={compact ? "grid grid-cols-1 gap-y-4" : "grid grid-cols-3 gap-x-6 gap-y-4 max-[1100px]:grid-cols-2 max-[640px]:grid-cols-1"} data-testid="result-details">
       {GROUPS.map((g) => (
         <section key={g.title} className="min-w-0">
           <h3 className="caps mb-1.5 !text-fg">{g.title}</h3>

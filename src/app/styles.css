@@ -365,6 +365,14 @@ select.input {
 .workspace-tools-wrap[data-open="true"] {
   height: 34px;
 }
+.side-workspace {
+  width: clamp(360px, 38vw, 420px);
+  animation: side-workspace-enter var(--t-med) var(--ease) both;
+}
+@keyframes side-workspace-enter {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
 .drawer-panel {
   transition: flex-basis var(--t-med) var(--ease);
 }

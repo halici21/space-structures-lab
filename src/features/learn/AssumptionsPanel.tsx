@@ -74,7 +74,28 @@ function describe(c: AssumptionCheck, s: SolvedDocument): { title: string; value
   return texts[c.id]();
 }
 
-export function AssumptionsPanel({ solved }: { solved: SolvedDocument }) {
+export function AssumptionsPanel({ solved, compact = false }: { solved: SolvedDocument; compact?: boolean }) {
+  if (compact) {
+    return (
+      <div data-testid="assumptions-panel">
+        <h3 className="caps mb-1 !text-fg">Euler–Bernoulli assumptions</h3>
+        <p className="mb-2 text-[12px] text-faint">Checked live against the current model</p>
+        {solved.checks.map((c) => {
+          const d = describe(c, solved);
+          return (
+            <section key={c.id} className="border-t border-line py-2.5 text-[12.5px] leading-snug" data-testid={`assumption-${c.id}`} data-status={c.status}>
+              <div className="mb-1 flex items-center gap-2">
+                {ICON[c.status]}
+                <strong className="font-medium text-fg">{d.title}</strong>
+                <span className="num ml-auto text-right text-muted">{d.value}</span>
+              </div>
+              <p className="pl-[23px] text-muted">{d.why}</p>
+            </section>
+          );
+        })}
+      </div>
+    );
+  }
   return (
     <div data-testid="assumptions-panel">
       <div className="mb-2 flex items-baseline gap-2">

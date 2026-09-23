@@ -5,14 +5,14 @@
  *   analysis dock (result strip + tabs)
  *   status bar
  */
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
 import { useLab, useSolved } from "@/state/store";
 import { Inspector } from "../inspector/Inspector";
 import { LibraryDialog } from "../library/Library";
 import { ModelTree } from "../tree/ModelTree";
 import { Onboarding } from "../viewport/Onboarding";
-import { Dock } from "./Dock";
+import { Dock, SideDock } from "./Dock";
 import { EmptyState } from "./EmptyState";
 import { StatusBar } from "./StatusBar";
 import { Ribbon, Toolbar } from "./Toolbar";
@@ -26,11 +26,24 @@ export function ViewportLoading() {
 export function DesktopShell() {
   const solved = useSolved();
   const hasModel = useLab((s) => s.doc !== null);
+  const workspace = useLab((s) => s.workspace);
+  const dockOpen = useLab((s) => s.dockOpen);
+  const setDockOpen = useLab((s) => s.setDockOpen);
+  const [laptop, setLaptop] = useState(() => matchMedia("(max-width: 1180px)").matches);
+  const sideWorkspace = laptop && (workspace === "analyze" || workspace === "learn") && !!solved?.ok;
+  const previousSideWorkspace = useRef(sideWorkspace);
   const tree = usePanelRef();
   const inspector = usePanelRef();
   const [panes, setPanes] = useState({ tree: false, inspector: false });
   const [toolsOpen, setToolsOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+
+  useEffect(() => {
+    const query = matchMedia("(max-width: 1180px)");
+    const onChange = () => setLaptop(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
 
   // Keep the first view focused. When a model exists, open its inspector so
   // the user can edit immediately; the model tree stays available on demand.
@@ -41,7 +54,27 @@ export function DesktopShell() {
     setPanes({ tree: false, inspector: hasModel });
   }, [hasModel, inspector, tree]);
 
+  useEffect(() => {
+    if (sideWorkspace && dockOpen) {
+      tree.current?.collapse();
+      inspector.current?.collapse();
+    } else if (previousSideWorkspace.current && !sideWorkspace && hasModel) {
+      // The panel group measures its new width after the side workspace leaves.
+      const timer = window.setTimeout(() => inspector.current?.expand(), 180);
+      previousSideWorkspace.current = sideWorkspace;
+      return () => window.clearTimeout(timer);
+    }
+    previousSideWorkspace.current = sideWorkspace;
+  }, [sideWorkspace, dockOpen, hasModel, inspector, tree]);
+
   const openInspector = () => {
+    if (sideWorkspace && dockOpen) {
+      setDockOpen(false);
+      window.setTimeout(() => {
+        if (!useLab.getState().dockOpen) inspector.current?.expand();
+      }, 180);
+      return;
+    }
     if (window.innerWidth < 1180) tree.current?.collapse();
     inspector.current?.expand();
   };
@@ -49,6 +82,13 @@ export function DesktopShell() {
   const toggle = (p: "tree" | "inspector") => {
     const ref = p === "tree" ? tree : inspector;
     if (ref.current?.isCollapsed()) {
+      if (sideWorkspace && dockOpen) {
+        setDockOpen(false);
+        window.setTimeout(() => {
+          if (!useLab.getState().dockOpen) ref.current?.expand();
+        }, 180);
+        return;
+      }
       // On laptop widths, keep one drawer open at a time so the viewport stays usable.
       if (window.innerWidth < 1180) {
         const other = p === "tree" ? inspector : tree;
@@ -75,8 +115,8 @@ export function DesktopShell() {
         </div>
       )}
 
-      <div className="min-h-0 flex-1">
-        <Group orientation="horizontal" className="desktop-panel-group h-full">
+      <div className="flex min-h-0 flex-1">
+        <Group orientation="horizontal" className="desktop-panel-group min-w-0 flex-1">
           <Panel
             id="tree"
             panelRef={tree}
@@ -140,9 +180,10 @@ export function DesktopShell() {
             </aside>
           </Panel>
         </Group>
+        {sideWorkspace && dockOpen && solved?.ok && <SideDock solved={solved.value} />}
       </div>
 
-      {solved?.ok && <Dock solved={solved.value} />}
+      {solved?.ok && <Dock solved={solved.value} stripOnly={sideWorkspace} />}
       <StatusBar />
       <LibraryDialog open={libraryOpen} onOpenChange={setLibraryOpen} />
     </div>

@@ -362,3 +362,37 @@ Final verification: all 32 Playwright tests passed (27 interaction/reference/
 accessibility and 5 visual captures); TypeScript passed; all 131 unit tests
 passed; the production Vite build succeeded. This is a browser review at the
 listed sizes, not a physical-device or manual screen-reader study.
+
+## 13. Laptop analysis workspace — 2026-09-24
+
+At 1024 × 768, the expanded bottom Learn/Analyze dock left only about 355 px
+of viewport height. The model and its deformation were cramped even though the
+reading panel had more horizontal space than its content needed.
+
+Analyze and Learn now open as a 389 px right workspace at laptop widths
+(768–1180 px). The three primary results and the model-validity notice stay
+in the bottom strip. The viewport retains roughly 600 px of height and 635 px
+of width at 1024 × 768. Results, Sensitivity, Learn, and Assumptions share
+the right workspace's tabs. Their existing content uses a single-column
+layout there: graph with scaling notes below, equations stacked vertically,
+and full assumption explanations under each live check.
+
+The Model and Properties toolbar controls close the side workspace before
+opening their drawers. “All results,” the result-strip expander, and the
+contextual tools reopen it. Moving back to Model/Physics restores Properties.
+The wide desktop and phone layouts keep their prior composition. The new
+workspace entrance uses the existing 180 ms motion token and respects reduced
+motion settings.
+
+Reviewed regenerated 1024 × 768 screenshots for Learn, Results, Sensitivity,
+Why?, and Inspector. The viewport remains central, result values and chart
+labels are readable, and the page has no horizontal overflow or console
+errors. A browser regression flow covers Learn → Model, Analyze → Properties,
+and returning to Results. Physical-device and manual screen-reader review
+remain outstanding.
+
+Final verification: 33 Playwright flows, 131 unit tests, TypeScript, and the
+production Vite build passed. One transient browser-test failure during an
+earlier run came from the development-only viewport hook not being ready after
+a page refresh; the point-click helper now waits for the hook. The complete
+suite passed on the subsequent run.

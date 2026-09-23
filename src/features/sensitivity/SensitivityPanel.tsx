@@ -27,7 +27,7 @@ const signedPct = (r: number) => {
   return `${p >= 0 ? "+" : "−"}${formatNumber(Math.abs(p), 3)}%`;
 };
 
-export function SensitivityPanel({ solved }: { solved: SolvedDocument }) {
+export function SensitivityPanel({ solved, compact = false }: { solved: SolvedDocument; compact?: boolean }) {
   const { param, response, logScale } = useLab((s) => s.sensitivity);
   const setSensitivity = useLab((s) => s.setSensitivity);
   const setParameter = useLab((s) => s.setParameter);
@@ -46,8 +46,8 @@ export function SensitivityPanel({ solved }: { solved: SolvedDocument }) {
   const toY = (v: number) => formatNumber(toDisplay(v, yu), 3);
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_260px] gap-x-4 max-[900px]:grid-cols-1" data-testid="sensitivity-panel">
-      <div className="flex min-h-0 flex-col">
+    <div className={compact ? "grid min-h-0 grid-cols-1 gap-y-4" : "grid h-full min-h-0 grid-cols-[minmax(0,1fr)_260px] gap-x-4 max-[900px]:grid-cols-1"} data-testid="sensitivity-panel">
+      <div className={compact ? "flex min-h-[330px] flex-col" : "flex min-h-0 flex-col"}>
         <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <div className="flex items-center gap-1.5">
             <span className="text-muted">Vary</span>
@@ -84,7 +84,7 @@ export function SensitivityPanel({ solved }: { solved: SolvedDocument }) {
             onChange={(v) => setSensitivity({ logScale: v === "log" })}
           />
         </div>
-        <div className="min-h-0 flex-1">
+        <div className={compact ? "h-[240px] min-h-0 flex-1" : "min-h-0 flex-1"}>
           <LineChart
             points={points}
             current={current}
@@ -99,7 +99,7 @@ export function SensitivityPanel({ solved }: { solved: SolvedDocument }) {
         </div>
       </div>
 
-      <aside className="min-h-0 overflow-y-auto border-l border-line pl-4 text-[12.5px] leading-snug max-[900px]:hidden">
+      <aside className={compact ? "border-t border-line pt-3 text-[12.5px] leading-snug" : "min-h-0 overflow-y-auto border-l border-line pl-4 text-[12.5px] leading-snug max-[900px]:hidden"}>
         <p className="caps mb-1">Scaling</p>
         <div className="mb-2 text-[13px] text-fg" data-testid="sens-law">
           {e === 0 ? (

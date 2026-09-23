@@ -63,7 +63,7 @@ export function DockTabs({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function DockPanel({ solved }: { solved: SolvedDocument }) {
+export function DockPanel({ solved, compact = false }: { solved: SolvedDocument; compact?: boolean }) {
   const dockTab = useLab((s) => s.dockTab);
   return (
     <div
@@ -72,13 +72,13 @@ export function DockPanel({ solved }: { solved: SolvedDocument }) {
       aria-labelledby={`dock-tab-${dockTab}`}
       // Focusable so keyboard users can scroll it (WAI-ARIA tabs pattern).
       tabIndex={0}
-      className={"min-h-0 flex-1 px-4 py-3 " + (dockTab === "sensitivity" ? "overflow-hidden" : "overflow-y-auto")}
+      className={"min-h-0 flex-1 px-4 py-3 " + (dockTab === "sensitivity" && !compact ? "overflow-hidden" : "overflow-y-auto")}
       data-testid="dock-panel"
     >
-      {dockTab === "details" && <ResultDetails solved={solved} />}
-      {dockTab === "sensitivity" && <SensitivityPanel solved={solved} />}
-      {dockTab === "learn" && <LearnPanel solved={solved} />}
-      {dockTab === "assumptions" && <AssumptionsPanel solved={solved} />}
+      {dockTab === "details" && <ResultDetails solved={solved} compact={compact} />}
+      {dockTab === "sensitivity" && <SensitivityPanel solved={solved} compact={compact} />}
+      {dockTab === "learn" && <LearnPanel solved={solved} compact={compact} />}
+      {dockTab === "assumptions" && <AssumptionsPanel solved={solved} compact={compact} />}
     </div>
   );
 }
@@ -86,7 +86,16 @@ export function DockPanel({ solved }: { solved: SolvedDocument }) {
 /** Reading tabs need more room than the results table. Heights are per tab and user-resizable. */
 const DEFAULT_HEIGHT: Record<DockTab, number> = { details: 310, sensitivity: 340, learn: 430, assumptions: 370 };
 
-export function Dock({ solved }: { solved: SolvedDocument }) {
+export function SideDock({ solved }: { solved: SolvedDocument }) {
+  return (
+    <section className="side-workspace flex min-h-0 shrink-0 flex-col border-l border-line bg-panel" aria-label="Analysis workspace" data-testid="side-dock">
+      <DockTabs compact />
+      <DockPanel solved={solved} compact />
+    </section>
+  );
+}
+
+export function Dock({ solved, stripOnly = false }: { solved: SolvedDocument; stripOnly?: boolean }) {
   const dockOpen = useLab((s) => s.dockOpen);
   const dockTab = useLab((s) => s.dockTab);
   const setDockTab = useLab((s) => s.setDockTab);
@@ -117,12 +126,12 @@ export function Dock({ solved }: { solved: SolvedDocument }) {
   return (
     <section
       className="relative flex shrink-0 flex-col border-t border-line bg-panel transition-[height] duration-150 ease-out"
-      style={{ height: dockOpen ? height : closedHeight }}
+      style={{ height: dockOpen && !stripOnly ? height : closedHeight }}
       aria-label="Analysis and results"
       data-testid="dock"
       data-open={dockOpen || undefined}
     >
-      {dockOpen && (
+      {dockOpen && !stripOnly && (
         <div
           role="separator"
           aria-orientation="horizontal"
@@ -141,7 +150,7 @@ export function Dock({ solved }: { solved: SolvedDocument }) {
       <div className="shrink-0 border-b border-line">
         <ResultStrip solved={solved} />
       </div>
-      {dockOpen && (
+      {dockOpen && !stripOnly && (
         <>
           <DockTabs />
           <DockPanel solved={solved} />

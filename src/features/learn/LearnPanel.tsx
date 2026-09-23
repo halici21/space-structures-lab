@@ -41,7 +41,7 @@ function Bullet({ lead, children }: { lead: ReactNode; children: ReactNode }) {
   );
 }
 
-export function LearnPanel({ solved }: { solved: SolvedDocument }) {
+export function LearnPanel({ solved, compact = false }: { solved: SolvedDocument; compact?: boolean }) {
   const system = useLab((s) => s.unitSystem);
   const hasEdit = useLab((s) => s.reference !== null);
   const r = solved.result;
@@ -57,7 +57,7 @@ export function LearnPanel({ solved }: { solved: SolvedDocument }) {
   );
 
   return (
-    <div className="grid grid-cols-3 gap-x-7 gap-y-5 text-[13px] leading-relaxed max-[1180px]:grid-cols-2 max-[640px]:grid-cols-1" data-testid="learn-panel">
+    <div className={compact ? "grid grid-cols-1 gap-y-5 text-[13px] leading-relaxed" : "grid grid-cols-3 gap-x-7 gap-y-5 text-[13px] leading-relaxed max-[1180px]:grid-cols-2 max-[640px]:grid-cols-1"} data-testid="learn-panel">
       {hasEdit && changeTopic}
       <Topic id="stiffness" title="Stiffness">
         <Eq tex="k_{tip} = \dfrac{3\,E\,I}{L^3}" />

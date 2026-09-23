@@ -34,6 +34,7 @@ export const unit = (page: Page, key: string) => page.getByTestId(`unit-${key}`)
 
 /** Clicks the viewport at the screen position of a world point. */
 export async function clickWorld(page: Page, p: [number, number, number]) {
+  await page.waitForFunction(() => typeof window.__ssl?.project === "function");
   const [x, y] = await page.evaluate((pt) => window.__ssl!.project(pt), p);
   const box = (await page.locator("canvas").boundingBox())!;
   await page.mouse.click(box.x + x, box.y + y);
