@@ -1,0 +1,462 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+/* ------------------------------------------------------------------ tokens */
+:root {
+  --font-ui: "Inter", "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", ui-monospace, Consolas, monospace;
+
+  --bg-app: #0e1013;
+  --bg-panel: #15171b;
+  --bg-raised: #1c1f24;
+  --bg-hover: #20242a;
+  --bg-input: #101216;
+  --bg-viewport: #191c21;
+  --line: #252930;
+  --line-strong: #353b44;
+  --text: #e4e7eb;
+  --text-muted: #a1a8b3;
+  --text-faint: #8b929d;
+  --accent: #5b9dff;
+  --accent-text: #8fbcff;
+  --accent-weak: rgb(91 157 255 / 0.14);
+  --accent-line: rgb(91 157 255 / 0.45);
+  /* Filled buttons: white text on this is 4.8:1 (the lighter accent is only 2.7:1). */
+  --primary: #2f6fd6;
+  --focus: #8fbcff;
+  --force: #f2a45d;
+  --support: #94a3b8;
+  --ok: #6cc592;
+  --caution: #e3b45f;
+  --violated: #f27d74;
+  --info: #a1a8b3;
+  --ok-weak: rgb(108 197 146 / 0.12);
+  --caution-weak: rgb(227 180 95 / 0.13);
+  --violated-weak: rgb(242 125 116 / 0.13);
+  --shadow-pop: 0 10px 30px rgb(0 0 0 / 0.45), 0 0 0 1px var(--line-strong);
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-fast: 120ms;
+  --t-med: 180ms;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg-app: #e6e8eb;
+  --bg-panel: #f7f8f9;
+  --bg-raised: #eef0f2;
+  --bg-hover: #e9ecef;
+  --bg-input: #ffffff;
+  --bg-viewport: #eef0f3;
+  --line: #dde0e4;
+  --line-strong: #c3c8cf;
+  --text: #1a1e23;
+  --text-muted: #515a66;
+  --text-faint: #5f6873;
+  --accent: #1f6feb;
+  --accent-text: #1757c2;
+  --accent-weak: rgb(31 111 235 / 0.1);
+  --accent-line: rgb(31 111 235 / 0.45);
+  --primary: #1a5fd0;
+  --focus: #1f6feb;
+  --force: #9c4a08;
+  --support: #5b6b80;
+  --ok: #17693c;
+  --caution: #8a5a00;
+  --violated: #b3261e;
+  --info: #515a66;
+  --ok-weak: rgb(23 105 60 / 0.1);
+  --caution-weak: rgb(138 90 0 / 0.1);
+  --violated-weak: rgb(179 38 30 / 0.09);
+  --shadow-pop: 0 10px 30px rgb(20 30 40 / 0.16), 0 0 0 1px var(--line-strong);
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-med: 0ms;
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-mono);
+  --color-app: var(--bg-app);
+  --color-panel: var(--bg-panel);
+  --color-raised: var(--bg-raised);
+  --color-hover: var(--bg-hover);
+  --color-input: var(--bg-input);
+  --color-viewport: var(--bg-viewport);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-accent-weak: var(--accent-weak);
+  --color-force: var(--force);
+  --color-support: var(--support);
+  --color-ok: var(--ok);
+  --color-caution: var(--caution);
+  --color-violated: var(--violated);
+  --color-info: var(--info);
+}
+
+/* -------------------------------------------------------------------- base */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--accent-weak);
+}
+
+/* scrollbars: thin, calm */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* --------------------------------------------------------------- primitives */
+.caps {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease);
+}
+.btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--text-faint);
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn[aria-disabled="true"]:hover {
+  background: transparent;
+}
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  font-weight: 550;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--accent-text);
+  filter: brightness(1.08);
+}
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: transparent;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.icon-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.icon-btn[aria-pressed="true"] {
+  color: var(--accent-text);
+  background: var(--accent-weak);
+}
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* segmented control */
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+}
+.seg > button {
+  height: 22px;
+  min-width: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.seg > button:hover:not([aria-checked="true"]):not(:disabled) {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+.seg > button[aria-checked="true"] {
+  background: var(--bg-raised);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+.seg > button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* inputs */
+.input {
+  width: 100%;
+  height: 24px;
+  padding: 0 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  transition: border-color var(--t-fast) var(--ease);
+}
+.input:hover {
+  border-color: var(--text-faint);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-weak);
+}
+.input[aria-invalid="true"] {
+  border-color: var(--violated);
+  box-shadow: 0 0 0 2px var(--violated-weak);
+}
+select.input {
+  text-align: left;
+  padding-right: 22px;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 11px) 10px,
+    calc(100% - 7px) 10px;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+/* status chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+.chip-ok {
+  color: var(--ok);
+  background: var(--ok-weak);
+}
+.chip-caution {
+  color: var(--caution);
+  background: var(--caution-weak);
+}
+.chip-violated {
+  color: var(--violated);
+  background: var(--violated-weak);
+}
+.chip-info {
+  color: var(--text-muted);
+  background: var(--bg-raised);
+}
+.chip-accent {
+  color: var(--accent-text);
+  background: var(--accent-weak);
+}
+
+kbd,
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  background: var(--bg-raised);
+}
+
+/* popovers */
+.pop {
+  z-index: 60;
+  border-radius: var(--radius-md);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-pop);
+  color: var(--text);
+  animation: pop-in var(--t-med) var(--ease);
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.tip {
+  z-index: 70;
+  max-width: 260px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-pop);
+  color: var(--text);
+  font-size: 11.5px;
+  line-height: 1.35;
+  animation: pop-in var(--t-fast) var(--ease);
+}
+
+/* resize separators */
+.sep-v {
+  width: 1px;
+  background: var(--line);
+  position: relative;
+  transition: background var(--t-fast) var(--ease);
+}
+.sep-v::after {
+  content: "";
+  position: absolute;
+  inset: 0 -3px;
+}
+.sep-v:hover,
+.sep-v[data-separator="hover"],
+.sep-v[data-separator="active"],
+.sep-v[data-separator="focus"],
+.sep-v:focus-visible {
+  background: var(--accent);
+}
+
+/* KaTeX sizing inside the dense UI */
+.tex .katex {
+  font-size: 1.12em;
+}
+.tex-display .katex {
+  font-size: 1.28em;
+}
+
+/* 3D label chips rendered through drei <Html> */
+.vp-label {
+  pointer-events: none;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  will-change: transform;
+}
+.vp-label-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-line);
+}
+.vp-label-force {
+  color: var(--force);
+  border-color: color-mix(in srgb, var(--force) 45%, transparent);
+}
+.vp-label-muted {
+  color: var(--text-muted);
+}
