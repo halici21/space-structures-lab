@@ -118,7 +118,7 @@ const DEFAULT_ONBOARDING: OnboardingState = {
   deformationInspected: false,
   whyOpened: false,
   dismissed: false,
-  collapsed: false,
+  collapsed: true,
 };
 
 const WORKSPACE_DOCK: Record<Workspace, { tab: DockTab; open: boolean }> = {

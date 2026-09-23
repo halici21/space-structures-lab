@@ -1,7 +1,7 @@
 /**
- * Compact, always-visible result strip. Each value carries a ratio chip
- * against the model as it was before the current edit, which is the fastest
- * way to *see* a scaling law (edit L 1 → 2 m and δ shows ×8).
+ * Compact, always-visible result strip. The three governing quantities stay
+ * visible; the full result table opens on demand. Each value can show its
+ * ratio against the model before the current edit.
  */
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useMemo } from "react";
@@ -19,9 +19,6 @@ import { WhyButton, type WhyKey } from "./Why";
 const STRIP: { key: ResultKey; why: WhyKey }[] = [
   { key: "tipDeflection", why: "tipDeflection" },
   { key: "maxBendingStress", why: "maxBendingStress" },
-  { key: "rootMoment", why: "rootMoment" },
-  { key: "mass", why: "mass" },
-  { key: "EI", why: "EI" },
   { key: "tipStiffness", why: "tipStiffness" },
 ];
 
@@ -132,6 +129,16 @@ export function ResultStrip({ solved, compact = false }: { solved: SolvedDocumen
           );
         })}
       </dl>
+
+      {!compact && (
+        <button
+          className="shrink-0 border-l border-line px-3 text-[11.5px] font-medium text-accent-text hover:bg-hover"
+          onClick={() => setDockTab("details")}
+          data-testid="all-results"
+        >
+          All results
+        </button>
+      )}
 
       {!compact && (
         <button

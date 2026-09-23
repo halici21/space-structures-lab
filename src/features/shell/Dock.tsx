@@ -9,6 +9,7 @@ import { AssumptionsPanel } from "../learn/AssumptionsPanel";
 import { LearnPanel } from "../learn/LearnPanel";
 import { ResultDetails } from "../results/ResultDetails";
 import { ResultStrip } from "../results/ResultStrip";
+import { ValidityNotice } from "../results/ValidityNotice";
 import { SensitivityPanel } from "../sensitivity/SensitivityPanel";
 
 const TABS: { id: DockTab; label: string }[] = [
@@ -88,10 +89,14 @@ const DEFAULT_HEIGHT: Record<DockTab, number> = { details: 290, sensitivity: 330
 export function Dock({ solved }: { solved: SolvedDocument }) {
   const dockOpen = useLab((s) => s.dockOpen);
   const dockTab = useLab((s) => s.dockTab);
+  const setDockTab = useLab((s) => s.setDockTab);
   const [heights, setHeights] = useState(DEFAULT_HEIGHT);
+  const noticeHeight = solved.status === "violated" || solved.status === "caution" ? 40 : 0;
+  const closedHeight = STRIP + noticeHeight;
+  const minHeight = closedHeight + TABBAR + MIN_PANEL;
   // The viewport stays the centre of gravity: it always keeps at least MIN_VIEWPORT px.
   const max = () => Math.round(Math.min(window.innerHeight * 0.58, window.innerHeight - CHROME - MIN_VIEWPORT));
-  const height = Math.min(heights[dockTab], Math.max(STRIP + TABBAR + MIN_PANEL, max()));
+  const height = Math.min(heights[dockTab], Math.max(minHeight, max()));
   const setHeight = (next: number | ((h: number) => number)) =>
     setHeights((hs) => ({ ...hs, [dockTab]: typeof next === "function" ? next(hs[dockTab]) : next }));
   const drag = useRef<{ y: number; h: number } | null>(null);
@@ -102,17 +107,17 @@ export function Dock({ solved }: { solved: SolvedDocument }) {
   };
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
     if (!drag.current) return;
-    setHeight(Math.max(STRIP + TABBAR + MIN_PANEL, Math.min(max(), drag.current.h + drag.current.y - e.clientY)));
+    setHeight(Math.max(minHeight, Math.min(max(), drag.current.h + drag.current.y - e.clientY)));
   };
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowUp") setHeight((h) => Math.min(max(), h + 24));
-    if (e.key === "ArrowDown") setHeight((h) => Math.max(STRIP + TABBAR + MIN_PANEL, h - 24));
+    if (e.key === "ArrowDown") setHeight((h) => Math.max(minHeight, h - 24));
   };
 
   return (
     <section
       className="relative flex shrink-0 flex-col border-t border-line bg-panel transition-[height] duration-150 ease-out"
-      style={{ height: dockOpen ? height : STRIP }}
+      style={{ height: dockOpen ? height : closedHeight }}
       aria-label="Analysis and results"
       data-testid="dock"
       data-open={dockOpen || undefined}
@@ -132,6 +137,7 @@ export function Dock({ solved }: { solved: SolvedDocument }) {
           data-testid="dock-resize"
         />
       )}
+      {noticeHeight > 0 && <ValidityNotice solved={solved} onReview={() => setDockTab("assumptions")} />}
       <div className="shrink-0 border-b border-line">
         <ResultStrip solved={solved} />
       </div>

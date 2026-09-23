@@ -16,8 +16,18 @@ export function StatusBar() {
     <footer className="flex h-6 shrink-0 items-center gap-3 border-t border-line bg-panel px-3 text-[11px] text-muted" data-testid="status-bar">
       {solved?.ok ? (
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden />
-          Solved live · Euler–Bernoulli · closed form
+          <span
+            className={
+              "h-1.5 w-1.5 rounded-full " +
+              (solved.value.status === "violated" ? "bg-violated" : solved.value.status === "caution" ? "bg-caution" : "bg-ok")
+            }
+            aria-hidden
+          />
+          {solved.value.status === "violated"
+            ? "Computed · outside model assumptions"
+            : solved.value.status === "caution"
+              ? "Computed · near model limits"
+              : "Solved live · Euler–Bernoulli · closed form"}
         </span>
       ) : solved ? (
         <span className="text-violated">{solved.reason}</span>

@@ -189,6 +189,7 @@ test.describe("explanations", () => {
     await expect(why).toContainText("Length");
     await expect(why).toContainText("+33.1%");
     await expect(why).toContainText("×8");
+    await page.getByRole("button", { name: "Expand guide" }).click();
     await expect(page.getByTestId("onboarding-whyOpened")).toHaveAttribute("data-complete", "true");
     await page.keyboard.press("Escape");
     await expect(why).toHaveCount(0);
@@ -234,8 +235,29 @@ test.describe("explanations", () => {
 });
 
 test.describe("shell", () => {
+  test("focused first view keeps the validity context and reveals secondary controls on demand", async ({ page }) => {
+    await freshModel(page);
+    await expect(page.getByTestId("toggle-tools")).toHaveAttribute("aria-expanded", "false");
+    const toolDrawer = page.locator(".workspace-tools-wrap");
+    await expect(toolDrawer).toHaveAttribute("aria-hidden", "true");
+    await expect.poll(async () => (await toolDrawer.boundingBox())!.height).toBeLessThan(1);
+    await expect(page.getByRole("button", { name: "Expand guide" })).toBeVisible();
+    await expect(page.getByTestId("validity-notice")).toHaveAttribute("data-status", "violated");
+    await expect(page.getByTestId("validity-notice")).toContainText("δ/L = 155%");
+    await expect(page.getByTestId("all-results")).toBeVisible();
+
+    await setField(page, "field-L", "0.25");
+    await expect(page.getByTestId("validity-notice")).toHaveAttribute("data-status", "caution");
+    await openTree(page);
+    await page.getByTestId("tree-item-load-tip-01").click();
+    await setField(page, "field-F", "5");
+    await expect(page.getByTestId("validity-notice")).toHaveCount(0);
+    await expect(page.getByTestId("status-chip")).toHaveAttribute("data-status", "ok");
+  });
+
   test("workspaces switch the ribbon and dock over the same viewport", async ({ page }) => {
     await freshModel(page);
+    await page.getByTestId("toggle-tools").click();
     const canvas = page.locator("canvas");
     for (const [ws, tool] of [
       ["physics", "tool-support"],

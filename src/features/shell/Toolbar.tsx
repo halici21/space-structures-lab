@@ -21,6 +21,7 @@ import {
   Plus,
   RectangleHorizontal,
   Sigma,
+  SlidersHorizontal,
   Sun,
   type LucideIcon,
 } from "lucide-react";
@@ -156,13 +157,18 @@ export function Toolbar({
   onOpenLibrary,
   panes,
   onTogglePane,
+  toolsOpen,
+  onToggleTools,
 }: {
   onOpenLibrary(): void;
   panes: { tree: boolean; inspector: boolean };
   onTogglePane(p: "tree" | "inspector"): void;
+  toolsOpen: boolean;
+  onToggleTools(): void;
 }) {
   const theme = useLab((s) => s.theme);
   const setTheme = useLab((s) => s.setTheme);
+  const hasDoc = useLab((s) => s.doc !== null);
   return (
     <header className="flex h-10 shrink-0 items-stretch border-b border-line bg-panel" data-testid="toolbar">
       <div className="flex w-[257px] shrink-0 items-center gap-2 border-r border-line px-3 max-[1180px]:w-auto">
@@ -171,6 +177,21 @@ export function Toolbar({
       </div>
       <WorkspaceTabs />
       <div className="ml-auto flex items-center gap-0.5 px-2">
+        <Tip content={toolsOpen ? "Hide workspace tools" : "Show workspace tools"}>
+          <button
+            className="btn btn-ghost state-toggle h-[26px] px-2"
+            aria-label="Toggle workspace tools"
+            aria-controls="workspace-tools"
+            aria-expanded={toolsOpen}
+            aria-pressed={toolsOpen}
+            disabled={!hasDoc}
+            onClick={onToggleTools}
+            data-testid="toggle-tools"
+          >
+            <SlidersHorizontal size={15} aria-hidden />
+            Tools
+          </button>
+        </Tip>
         <Tip content="Space Structures Library">
           <button className="btn btn-ghost" onClick={onOpenLibrary} data-testid="open-library">
             <LibraryBig size={15} /> <span className="max-[1180px]:hidden">Library</span>
@@ -179,7 +200,7 @@ export function Toolbar({
         <span className="mx-1 h-4 w-px bg-line" aria-hidden />
         <Tip content={panes.tree ? "Close model drawer" : "Open model drawer"}>
           <button
-            className="btn btn-ghost h-[26px] gap-1.5 px-2"
+            className="btn btn-ghost state-toggle h-[26px] gap-1.5 px-2"
             aria-label="Toggle model tree drawer"
             aria-controls="tree"
             aria-expanded={panes.tree}
@@ -193,7 +214,7 @@ export function Toolbar({
         </Tip>
         <Tip content={panes.inspector ? "Close properties drawer" : "Open properties drawer"}>
           <button
-            className="btn btn-ghost h-[26px] gap-1.5 px-2"
+            className="btn btn-ghost state-toggle h-[26px] gap-1.5 px-2"
             aria-label="Toggle properties drawer"
             aria-controls="inspector"
             aria-expanded={panes.inspector}
@@ -403,6 +424,7 @@ export function Ribbon({ onOpenLibrary }: { onOpenLibrary(): void }) {
 
   return (
     <div
+      id="workspace-tools"
       className="flex h-[34px] shrink-0 items-stretch overflow-x-auto overflow-y-hidden border-b border-line bg-panel"
       role="toolbar"
       aria-label={`${workspace} tools`}

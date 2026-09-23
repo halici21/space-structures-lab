@@ -13,6 +13,7 @@ import { AssumptionsPanel } from "../learn/AssumptionsPanel";
 import { LearnPanel } from "../learn/LearnPanel";
 import { LibraryDialog } from "../library/Library";
 import { ResultDetails } from "../results/ResultDetails";
+import { ValidityNotice } from "../results/ValidityNotice";
 import { ModelTree } from "../tree/ModelTree";
 import { ViewportLoading } from "./DesktopShell";
 import { EmptyState } from "./EmptyState";
@@ -86,8 +87,11 @@ export function MobileShell() {
             className="absolute top-2 left-2 flex max-w-[calc(100%-150px)] cursor-pointer flex-col items-start rounded-md border border-line bg-panel/95 px-2.5 py-1.5 text-left backdrop-blur-sm"
             onClick={() => setSheet("results")}
             data-testid="mobile-result-chip"
+            data-status={ok.status}
           >
-            <span className="caps !text-[10px]">Static bending</span>
+            <span className={"caps !text-[10px] " + (ok.status === "violated" ? "!text-violated" : ok.status === "caution" ? "!text-caution" : "")}>
+              {ok.status === "violated" ? "Outside assumptions" : ok.status === "caution" ? "Near limits" : "Static bending"}
+            </span>
             <span className="num text-[12px] text-fg">
               δ {formatQuantityText(ok.result.tipDeflection, "displacement", system)} · σ{" "}
               {formatQuantityText(ok.result.maxBendingStress, "stress", system, 3)}
@@ -116,6 +120,7 @@ export function MobileShell() {
             <Inspector showTitle={false} />
           </Sheet>
           <Sheet id="results" title="Results">
+            <ValidityNotice solved={ok} onReview={() => setSheet("learn")} compact />
             <div className="p-3">
               <ResultDetails solved={ok} />
             </div>

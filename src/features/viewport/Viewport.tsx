@@ -92,11 +92,13 @@ export default function Viewport({
   solved,
   compact = false,
   guideInViewport = false,
+  onShowInspector,
 }: {
   solved: SolvedDocument;
   compact?: boolean;
   /** Show the getting-started guide inside the viewport (when the tree panel is closed). */
   guideInViewport?: boolean;
+  onShowInspector?(): void;
 }) {
   const theme = useLab((s) => s.theme);
   const view = useLab((s) => s.view);
@@ -171,7 +173,7 @@ export default function Viewport({
         <LabelOverlay labels={labels} nodes={labelNodes} />
       </CanvasBoundary>
 
-      {guideOverlay && <Onboarding variant="overlay" forceCollapsed={short} />}
+      {guideOverlay && <Onboarding variant="overlay" forceCollapsed={short} onShowInspector={onShowInspector} />}
       <ViewTools compact={compact} />
       <DeformationBar solved={solved} compact={compact} />
       <ContourLegend solved={solved} compact={compact} />

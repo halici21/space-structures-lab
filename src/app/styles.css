@@ -209,6 +209,13 @@ button {
   background: var(--bg-hover);
   border-color: transparent;
 }
+.state-toggle[aria-expanded="true"] {
+  background: var(--accent-weak);
+  color: var(--accent-text);
+}
+.state-toggle[aria-expanded="true"]:hover:not(:disabled) {
+  background: var(--accent-weak);
+}
 
 .icon-btn {
   display: inline-grid;
@@ -350,6 +357,14 @@ select.input {
 }
 
 /* Desktop drawers retain their width controls while easing in and out. */
+.workspace-tools-wrap {
+  height: 0;
+  overflow: hidden;
+  transition: height var(--t-med) var(--ease);
+}
+.workspace-tools-wrap[data-open="true"] {
+  height: 34px;
+}
 .drawer-panel {
   transition: flex-basis var(--t-med) var(--ease);
 }

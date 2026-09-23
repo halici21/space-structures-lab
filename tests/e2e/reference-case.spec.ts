@@ -52,13 +52,20 @@ test("reference case typed through the UI reproduces the hand calculation", asyn
   await expect(unit(page, "tipDeflection")).toHaveText("mm");
   await expect(shown(page, "maxBendingStress")).toHaveText("800");
   await expect(unit(page, "maxBendingStress")).toHaveText("MPa");
-  await expect(shown(page, "rootMoment")).toHaveText("100");
-  await expect(unit(page, "rootMoment")).toHaveText("N·m");
-  await expect(shown(page, "mass")).toHaveText("0.405");
-  await expect(unit(page, "mass")).toHaveText("kg");
-  await expect(shown(page, "EI")).toHaveText("21.56");
-  await expect(unit(page, "EI")).toHaveText("N·m²");
   await expect(shown(page, "tipStiffness")).toHaveText("64.69");
+
+  // Secondary values remain available in the on-demand results table.
+  await page.getByTestId("all-results").click();
+  const details = page.getByTestId("result-details");
+  for (const [label, value, displayUnit] of [
+    ["Root moment", "100", "N·m"],
+    ["Mass", "0.405", "kg"],
+    ["Flexural stiffness", "21.56", "N·m²"],
+  ] as const) {
+    const row = details.getByText(label, { exact: true }).locator("..");
+    await expect(row.locator("dd")).toHaveText(value);
+    await expect(row.locator("span").filter({ hasText: displayUnit }).first()).toBeVisible();
+  }
 
   // Section properties and derived values in the inspector.
   await openTree(page);

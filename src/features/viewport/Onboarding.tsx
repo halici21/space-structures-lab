@@ -3,6 +3,7 @@
  * store), and each "Show me" focuses the control that performs it.
  */
 import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
+import { useEffect } from "react";
 import { formatNumber, formatQuantityText } from "@/core/units";
 import { solveCantilever } from "@/lib/structures/cantilever";
 import { withParameter } from "@/lib/structures/sensitivity";
@@ -29,20 +30,28 @@ function focusParam(param: string) {
 export function Onboarding({
   variant,
   forceCollapsed = false,
+  onShowInspector,
 }: {
   variant: "panel" | "overlay";
   /** Header only (short viewport), regardless of the stored preference. */
   forceCollapsed?: boolean;
+  onShowInspector?(): void;
 }) {
   const onboarding = useLab((s) => s.onboarding);
   const dismiss = useLab((s) => s.dismissOnboarding);
   const setCollapsed = useLab((s) => s.setGuideCollapsed);
+  const workspace = useLab((s) => s.workspace);
   const select = useLab((s) => s.select);
   const setWorkspace = useLab((s) => s.setWorkspace);
   const setDockOpen = useLab((s) => s.setDockOpen);
   const collapsed = onboarding.collapsed || forceCollapsed;
   const solved = useSolved();
   const system = useLab((s) => s.unitSystem);
+  // A compact guide stays discoverable without covering the working scene.
+  // Opening it is an explicit choice in each workspace.
+  useEffect(() => {
+    if (variant === "overlay") setCollapsed(true);
+  }, [variant, workspace, setCollapsed]);
   if (onboarding.dismissed) return null;
 
   // Step 1 turns a violated small-deflection assumption into the first lesson.
@@ -65,6 +74,7 @@ export function Onboarding({
       hint: lengthHint,
       show: () => {
         select(IDS.beam);
+        onShowInspector?.();
         focusParam("L");
       },
     },
@@ -74,6 +84,7 @@ export function Onboarding({
       hint: "Edit h or E, or swap the material.",
       show: () => {
         select(IDS.beam);
+        onShowInspector?.();
         focusParam("h");
       },
     },
@@ -106,13 +117,13 @@ export function Onboarding({
           ? "absolute top-2 left-2 rounded-md border border-line bg-panel/95 backdrop-blur-sm"
           : "mx-2 mb-2 rounded-md border border-line bg-raised/60"
       }
-      style={variant === "overlay" ? { width: GUIDE_WIDTH } : undefined}
+      style={variant === "overlay" ? { width: collapsed ? "auto" : GUIDE_WIDTH } : undefined}
       aria-label="Getting started"
       data-testid="onboarding"
       data-variant={variant}
     >
       <header className="flex h-8 items-center gap-2 pr-1 pl-2.5">
-        <span className="caps flex-1">Get started</span>
+        <span className="caps flex-1">{variant === "overlay" && collapsed ? "Guide" : "Get started"}</span>
         <span className="num text-[11px] text-faint">{done}/4</span>
         <button
           className="icon-btn h-6 w-6"

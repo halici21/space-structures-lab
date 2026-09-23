@@ -29,6 +29,7 @@ export function DesktopShell() {
   const tree = usePanelRef();
   const inspector = usePanelRef();
   const [panes, setPanes] = useState({ tree: false, inspector: false });
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
 
   // Keep the first view focused. When a model exists, open its inspector so
@@ -39,6 +40,11 @@ export function DesktopShell() {
     else inspector.current?.collapse();
     setPanes({ tree: false, inspector: hasModel });
   }, [hasModel, inspector, tree]);
+
+  const openInspector = () => {
+    if (window.innerWidth < 1180) tree.current?.collapse();
+    inspector.current?.expand();
+  };
 
   const toggle = (p: "tree" | "inspector") => {
     const ref = p === "tree" ? tree : inspector;
@@ -56,8 +62,18 @@ export function DesktopShell() {
 
   return (
     <div className="flex h-full flex-col" data-testid="desktop-shell">
-      <Toolbar onOpenLibrary={() => setLibraryOpen(true)} panes={panes} onTogglePane={toggle} />
-      {solved && <Ribbon onOpenLibrary={() => setLibraryOpen(true)} />}
+      <Toolbar
+        onOpenLibrary={() => setLibraryOpen(true)}
+        panes={panes}
+        onTogglePane={toggle}
+        toolsOpen={toolsOpen}
+        onToggleTools={() => setToolsOpen((open) => !open)}
+      />
+      {solved && (
+        <div className="workspace-tools-wrap shrink-0" data-open={toolsOpen} aria-hidden={!toolsOpen} inert={!toolsOpen}>
+          <Ribbon onOpenLibrary={() => setLibraryOpen(true)} />
+        </div>
+      )}
 
       <div className="min-h-0 flex-1">
         <Group orientation="horizontal" className="desktop-panel-group h-full">
@@ -82,7 +98,7 @@ export function DesktopShell() {
             >
               <ModelTree
                 onOpenLibrary={() => setLibraryOpen(true)}
-                guide={solved?.ok && panes.tree ? <Onboarding variant="panel" /> : null}
+                guide={solved?.ok && panes.tree ? <Onboarding variant="panel" onShowInspector={openInspector} /> : null}
               />
             </aside>
           </Panel>
@@ -91,7 +107,7 @@ export function DesktopShell() {
             <main className="h-full" aria-label="Viewport">
               {solved?.ok ? (
                 <Suspense fallback={<ViewportLoading />}>
-                  <Viewport solved={solved.value} guideInViewport={!panes.tree} />
+                  <Viewport solved={solved.value} guideInViewport={!panes.tree} onShowInspector={openInspector} />
                 </Suspense>
               ) : solved ? (
                 <div className="grid h-full place-items-center bg-viewport p-6 text-violated">{solved.reason}</div>
@@ -105,7 +121,7 @@ export function DesktopShell() {
             id="inspector"
             panelRef={inspector}
             defaultSize="0px"
-            minSize="288px"
+            minSize="336px"
             maxSize="440px"
             collapsible
             collapsedSize="0px"

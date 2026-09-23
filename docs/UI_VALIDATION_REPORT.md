@@ -285,4 +285,42 @@ scope.
 
 - The contextual ribbon and viewport HUD are still visible while their controls also appear in the workspace. This revision keeps those controls in place to avoid hiding functionality; a later pass can test progressive disclosure for less-used tools.
 - The onboarding guide remains a small overlay on the viewport while the Model drawer is closed. It can still be collapsed or dismissed, and remains available inside the Model drawer.
-- The live Vercel deployment was used as a reference. These local changes have not been deployed.
+- The live Vercel deployment was used as a reference. At the time of this
+  drawer revision, the local changes had not yet been deployed.
+
+## 11. Focused hierarchy revision — 2026-09-24
+
+The user found the working screen too dense. This pass changes disclosure and
+emphasis while preserving the specification's four workspaces, persistent 3D
+viewport, full calculations, and live assumptions.
+
+| Priority | Finding in the rendered interface | Change |
+|---|---|---|
+| P1 | The invalid default model still presented precise numerical results, while the small red status chip gave too little context. | A persistent notice above the result strip states the measured limit (`stress / strength`, `δ/L`), explains that out-of-assumption linear results are illustrative, and opens the detailed assumptions. The status bar also reflects the warning state. The same explanation appears in mobile Results. |
+| P2 | Two tool rows plus the bottom results and side inspector competed with the viewport. | The contextual ribbon now opens from a labelled Tools control. Its 180 ms reveal follows the reduced-motion token. Model and Properties controls show their active state. |
+| P2 | Six equal-weight result tiles made the primary response hard to find. | The closed strip shows displacement, maximum stress, and tip stiffness. “All results” opens the existing full table, including moment, mass, and `EI`. |
+| P2 | The first-run guide covered part of the 3D scene and repeated other instructions. | The guide starts as a compact header, can expand or dismiss, and opens the inspector before focusing a requested input. |
+| P3 | Inspector row labels truncated at the old 288 px minimum. | The minimum width is 336 px; the laptop layout continues to keep only one side drawer open at a time. |
+
+The previously reported screenshot “numerical mismatch” was a reading error,
+not a solver defect. At `L ≈ 337.8 m` and `F = 100 N`, the shown root moment
+(`≈33,779 N·m`), maximum stress (`≈270,235 MPa`), and stress legend agree with
+the same beam calculation. The outstanding trust issue was insufficiently
+visible model-validity context, addressed above.
+
+### Verification and remaining work
+
+- Reviewed regenerated screenshots at 1280 × 900, 1440 × 1000, 1024 × 768,
+  and 390 × 844 in dark and light themes. The warning, full Results sheet,
+  inspector, viewport, and collapsed guide remain readable without page-level
+  horizontal overflow or console errors. The captures in `docs/screenshots/`
+  reflect this revision.
+- The 21 existing interaction/reference-case flows passed after adapting to
+  the on-demand controls. One additional flow checks invalid → caution → valid
+  warning states. All five screenshot checks and five accessibility checks
+  passed. TypeScript and the production Vite build passed.
+- The 1 m reference beam still opens beyond the linear model's limits by
+  design. The compact guide makes the first lesson less prominent; its
+  discoverability needs observation with first-time users. The long inspector
+  still requires scrolling, and the physical mobile-device review remains
+  outstanding.
