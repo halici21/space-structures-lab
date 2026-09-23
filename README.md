@@ -16,10 +16,10 @@ does only that.
 
 ## Run
 
-Requires Node 20+ (developed on Node 24).
+Requires Node.js 20.19+ or 22.12+ (the project is developed on Node 24).
 
 ```bash
-npm install
+npm ci
 npm run dev          # http://127.0.0.1:5180
 ```
 
@@ -33,7 +33,7 @@ the detected Vite settings, or set these values manually:
 | Framework preset | Vite |
 | Build command | `npm run build` |
 | Output directory | `dist` |
-| Install command | `npm install` (default) |
+| Install command | `npm ci` |
 
 `vercel.json` sends app routes to `index.html`, so client-side routes continue
 to work when opened directly. No server, database, or environment variables
