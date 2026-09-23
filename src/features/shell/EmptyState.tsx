@@ -41,6 +41,13 @@ export function EmptyState({ onOpenLibrary }: { onOpenLibrary(): void }) {
             </div>
           ))}
         </dl>
+        <p
+          className="mb-3 rounded-sm border border-line bg-app/30 px-2.5 py-2 text-[11px] leading-snug text-muted"
+          role="note"
+          data-testid="reference-case-note"
+        >
+          <span className="font-medium text-fg">Reference case.</span> It starts outside the model's assumptions: δ/L = 155%, and 800 MPa bending stress exceeds the 276 MPa 6061-T6 yield strength. The guide explains why and suggests a 0.25 m comparison.
+        </p>
         <button className="btn btn-primary h-8 w-full justify-center" onClick={createExample} data-testid="create-cantilever" autoFocus>
           Create cantilever beam <ArrowRight size={14} />
         </button>

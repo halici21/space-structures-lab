@@ -7,7 +7,7 @@
  */
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Group, Panel, Separator, usePanelRef } from "react-resizable-panels";
-import { useSolved } from "@/state/store";
+import { useLab, useSolved } from "@/state/store";
 import { Inspector } from "../inspector/Inspector";
 import { LibraryDialog } from "../library/Library";
 import { ModelTree } from "../tree/ModelTree";
@@ -25,23 +25,33 @@ export function ViewportLoading() {
 
 export function DesktopShell() {
   const solved = useSolved();
+  const hasModel = useLab((s) => s.doc !== null);
   const tree = usePanelRef();
   const inspector = usePanelRef();
-  const [panes, setPanes] = useState({ tree: true, inspector: true });
+  const [panes, setPanes] = useState({ tree: false, inspector: false });
   const [libraryOpen, setLibraryOpen] = useState(false);
 
-  // Narrow laptops start with the tree folded so the viewport keeps priority.
+  // Keep the first view focused. When a model exists, open its inspector so
+  // the user can edit immediately; the model tree stays available on demand.
   useEffect(() => {
-    if (window.innerWidth < 1180) {
-      tree.current?.collapse();
-      setPanes((p) => ({ ...p, tree: false }));
-    }
-  }, [tree]);
+    tree.current?.collapse();
+    if (hasModel) inspector.current?.expand();
+    else inspector.current?.collapse();
+    setPanes({ tree: false, inspector: hasModel });
+  }, [hasModel, inspector, tree]);
 
   const toggle = (p: "tree" | "inspector") => {
     const ref = p === "tree" ? tree : inspector;
-    if (ref.current?.isCollapsed()) ref.current.expand();
-    else ref.current?.collapse();
+    if (ref.current?.isCollapsed()) {
+      // On laptop widths, keep one drawer open at a time so the viewport stays usable.
+      if (window.innerWidth < 1180) {
+        const other = p === "tree" ? inspector : tree;
+        other.current?.collapse();
+      }
+      ref.current.expand();
+    } else {
+      ref.current?.collapse();
+    }
   };
 
   return (
@@ -50,20 +60,26 @@ export function DesktopShell() {
       {solved && <Ribbon onOpenLibrary={() => setLibraryOpen(true)} />}
 
       <div className="min-h-0 flex-1">
-        <Group orientation="horizontal" className="h-full">
+        <Group orientation="horizontal" className="desktop-panel-group h-full">
           <Panel
             id="tree"
             panelRef={tree}
-            defaultSize="256px"
+            defaultSize="0px"
             minSize="208px"
             maxSize="380px"
             collapsible
             collapsedSize="0px"
             groupResizeBehavior="preserve-pixel-size"
             onResize={(s) => setPanes((p) => (p.tree === s.inPixels > 0 ? p : { ...p, tree: s.inPixels > 0 }))}
-            className="bg-panel"
+            className="drawer-panel bg-panel"
           >
-            <aside className="h-full overflow-hidden" aria-label="Model tree panel">
+            <aside
+              className="drawer-content drawer-content-left h-full overflow-hidden"
+              aria-label="Model tree panel"
+              aria-hidden={!panes.tree}
+              inert={!panes.tree}
+              data-open={panes.tree}
+            >
               <ModelTree
                 onOpenLibrary={() => setLibraryOpen(true)}
                 guide={solved?.ok && panes.tree ? <Onboarding variant="panel" /> : null}
@@ -88,16 +104,22 @@ export function DesktopShell() {
           <Panel
             id="inspector"
             panelRef={inspector}
-            defaultSize="328px"
+            defaultSize="0px"
             minSize="288px"
             maxSize="440px"
             collapsible
             collapsedSize="0px"
             groupResizeBehavior="preserve-pixel-size"
             onResize={(s) => setPanes((p) => (p.inspector === s.inPixels > 0 ? p : { ...p, inspector: s.inPixels > 0 }))}
-            className="bg-panel"
+            className="drawer-panel bg-panel"
           >
-            <aside className="h-full overflow-hidden" aria-label="Inspector panel">
+            <aside
+              className="drawer-content drawer-content-right h-full overflow-hidden"
+              aria-label="Inspector panel"
+              aria-hidden={!panes.inspector}
+              inert={!panes.inspector}
+              data-open={panes.inspector}
+            >
               <Inspector />
             </aside>
           </Panel>

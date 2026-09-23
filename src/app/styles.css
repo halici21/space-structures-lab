@@ -349,6 +349,67 @@ select.input {
   background: var(--accent-weak);
 }
 
+/* Desktop drawers retain their width controls while easing in and out. */
+.drawer-panel {
+  transition: flex-basis var(--t-med) var(--ease);
+}
+.desktop-panel-group:has(.sep-v[data-separator="active"]) .drawer-panel {
+  transition: none;
+}
+.drawer-content {
+  width: 100%;
+  opacity: 0;
+  transition:
+    opacity var(--t-med) var(--ease),
+    transform var(--t-med) var(--ease);
+  will-change: opacity, transform;
+}
+.drawer-content-left {
+  transform: translateX(-8px);
+}
+.drawer-content-right {
+  transform: translateX(8px);
+}
+.drawer-content[data-open="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Mobile sheets animate in both directions and stay absent from interaction
+  and the accessibility tree after their closing transition finishes. */
+.mobile-sheet-overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--t-med) var(--ease),
+    visibility 0s linear var(--t-med);
+}
+.mobile-sheet-overlay[data-state="open"] {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--t-med) var(--ease),
+    visibility 0s;
+}
+.mobile-sheet {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(24px);
+  transition:
+    opacity var(--t-med) var(--ease),
+    transform var(--t-med) var(--ease),
+    visibility 0s linear var(--t-med);
+}
+.mobile-sheet[data-state="open"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity var(--t-med) var(--ease),
+    transform var(--t-med) var(--ease),
+    visibility 0s;
+}
+
 kbd,
 .kbd {
   display: inline-grid;
@@ -373,16 +434,6 @@ kbd,
   box-shadow: var(--shadow-pop);
   color: var(--text);
   animation: pop-in var(--t-med) var(--ease);
-}
-@keyframes sheet-in {
-  from {
-    transform: translateY(24px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
 }
 @keyframes pop-in {
   from {

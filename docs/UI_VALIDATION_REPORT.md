@@ -209,3 +209,80 @@ Remaining weaknesses, by category. High-impact items found during this critique 
 - Mobile was tested in emulation (Chromium, 390 × 844, touch enabled), not on a physical device.
 - Screen-reader navigation was not tested manually. The ARIA structure (tree, tabs, radiogroups, labelled canvas) is automated-checked only.
 - The initial JavaScript chunk is 225 kB gzip (KaTeX + React). The 3D stack (260 kB gzip) is lazy-loaded.
+
+## 9. Follow-up audit — 2026-09-24
+
+### Source-of-truth review
+
+Read the complete `SPACE_STRUCTURES_INTERACTIVE_LAB_PRODUCT_SPEC.md` from the
+sibling `Grad/` workspace before changing the app. The running product remains
+within M0/M1: physics-first cantilever mechanics, one persistent viewport,
+contextual model tree and inspector, live assumptions, Learn/Analyze views,
+and clearly marked planned features. M2–M10 are roadmap items, not audit
+failures.
+
+### Ranked findings
+
+| Severity | Surface | Finding | Status |
+|---|---|---|---|
+| P2 — moderate | First-run start card | The default example's values were shown without explaining that the resulting δ/L = 155% and σ = 800 MPa exceed the model's small-deflection and 6061-T6 yield limits. The red result after creation could look like a solver fault. | **Fixed:** Added a compact reference-case note with the comparison values and the guide's suggested 0.25 m edit. |
+| P2 — moderate | Analyze / Learn dock | The bottom dock uses about 40% of the available height on larger screens. At 1024 × 768, the viewport stays at its 320 px floor while reading. The dock can be resized, and moving it beside the viewport would reduce viewport width and compete with the inspector. | Open design trade-off; no change made. |
+| P3 — low | Inspector | Derived properties can sit below the fold at 900 px height. The inspector is scrollable and its groups are collapsible. | Known density limitation; no change made. |
+| P3 — low | View framing / labels | The red assumptions chip leads the eye before the geometry, and secondary caps labels are 10–10.5 px. The warning is intentional; contrast checks remain clean. | Kept; start-card note now previews the warning. |
+
+No P1/high-severity defect was found. Planned modal/FEM/deployment features and
+the face-clickable view cube remain explicitly outside the implemented M0/M1
+scope.
+
+### Corrected first-run context
+
+| Surface | Viewports | Before | After | Remaining limitation |
+|---|---|---|---|---|
+| Cantilever start card | 1280 × 900, 1024 × 768, 390 × 844 | Listed the 1 m, 30 × 5 mm, 6061-T6, 100 N reference input and described it as a working model, without previewing its invalid result. | Explains δ/L = 155%, σ = 800 MPa vs. 276 MPa yield, and points to the 0.25 m guided comparison. The call to action remains visible at all reviewed sizes. | The 1 m teaching example still starts outside assumptions by design; the post-create status remains red until the user edits it. |
+
+### Verification
+
+- Started the Vite app at `http://127.0.0.1:5180/` and inspected its rendered
+  workspace. Visual review used fresh Playwright contexts so the user's browser
+  storage was not touched.
+- Regenerated and opened the initial-state captures at desktop (1280 × 900),
+  laptop (1024 × 768), and mobile (390 × 844). The new note does not clip, wrap
+  over the button, or cause horizontal overflow.
+- Ran the existing screenshot checks at 1280 × 900, 1440 × 1000, 1024 × 768,
+  and 390 × 844; accessibility checks covered the empty state, model, analysis,
+  Learn, assumptions, popovers, library, and mobile sheet.
+- All 21 interaction and UI-to-solver E2E tests passed, including camera,
+  selection, live edits, assumptions, the reference case, and scaling laws.
+- TypeScript check passed; all 131 unit tests passed; the production Vite build
+  succeeded. The initial JavaScript bundle remains about 225 kB gzip.
+- Manual screen-reader navigation and testing on a physical mobile device
+  remain unverified; automated axe checks report no serious or critical issues.
+
+## 10. Drawer-focused interface revision — 2026-09-24
+
+### Ranked finding
+
+| Severity | Surface | Finding | Status |
+|---|---|---|---|
+| P2 — moderate | Desktop shell | The model tree and long inspector competed with the 3D viewport as permanently visible side panels. Their icon-only toggles were also difficult to discover. | **Fixed:** Both are on-demand drawers. The inspector opens when a model is created; the tree opens from a labelled Model control. At laptop widths, only one drawer can be open at a time. All existing tools remain in their contextual ribbon, viewport controls, tree, inspector, and dock. |
+
+### Interaction and motion
+
+- The empty state now gives the start card the full viewport; neither side drawer reserves space.
+- With a model loaded, Properties opens by default for immediate editing. Model remains one click away.
+- At widths below 1180 px, opening one drawer closes the other to protect viewport width. Wider screens can show both.
+- Desktop drawers ease their width and content in over the existing 180 ms motion token. Mobile sheets animate in and out, including the scrim fade. Both follow `prefers-reduced-motion`.
+- The ribbon remains contextual so the existing editing and analysis actions stay directly discoverable; no capabilities were removed.
+
+### Visual and automated verification
+
+- Reviewed the empty screen, the model screen with Properties open, both drawers open on a wide screen, and the Model drawer on a 1024 px laptop. The model stays the visual focus and no page-level horizontal overflow appears.
+- Screenshot coverage now asserts the default panel state and captures the opened Model drawer at desktop, wide, and laptop sizes: `*-07-model-drawer.png`.
+- The targeted interaction, solver-reference, accessibility, and visual suites passed (31 tests); after adding drawer-state screenshot coverage, all 5 visual tests passed again.
+- TypeScript check and all 131 unit tests passed. The production Vite build succeeded after the drawer revision (initial chunk: 225 kB gzip).
+
+### Remaining design work
+
+- The contextual ribbon and viewport HUD are still visible while their controls also appear in the workspace. This revision keeps those controls in place to avoid hiding functionality; a later pass can test progressive disclosure for less-used tools.
+- The onboarding guide remains a small overlay on the viewport while the Model drawer is closed. It can still be collapsed or dismissed, and remains available inside the Model drawer.
+- The live Vercel deployment was used as a reference. These local changes have not been deployed.

@@ -177,14 +177,32 @@ export function Toolbar({
           </button>
         </Tip>
         <span className="mx-1 h-4 w-px bg-line" aria-hidden />
-        <Tip content="Model tree">
-          <button className="icon-btn" aria-label="Toggle model tree" aria-pressed={panes.tree} onClick={() => onTogglePane("tree")} data-testid="toggle-tree">
+        <Tip content={panes.tree ? "Close model drawer" : "Open model drawer"}>
+          <button
+            className="btn btn-ghost h-[26px] gap-1.5 px-2"
+            aria-label="Toggle model tree drawer"
+            aria-controls="tree"
+            aria-expanded={panes.tree}
+            aria-pressed={panes.tree}
+            onClick={() => onTogglePane("tree")}
+            data-testid="toggle-tree"
+          >
             <PanelLeft size={15} />
+            <span className="max-[900px]:hidden">Model</span>
           </button>
         </Tip>
-        <Tip content="Inspector">
-          <button className="icon-btn" aria-label="Toggle inspector" aria-pressed={panes.inspector} onClick={() => onTogglePane("inspector")} data-testid="toggle-inspector">
+        <Tip content={panes.inspector ? "Close properties drawer" : "Open properties drawer"}>
+          <button
+            className="btn btn-ghost h-[26px] gap-1.5 px-2"
+            aria-label="Toggle properties drawer"
+            aria-controls="inspector"
+            aria-expanded={panes.inspector}
+            aria-pressed={panes.inspector}
+            onClick={() => onTogglePane("inspector")}
+            data-testid="toggle-inspector"
+          >
             <PanelRight size={15} />
+            <span className="max-[900px]:hidden">Properties</span>
           </button>
         </Tip>
         <span className="mx-1 h-4 w-px bg-line" aria-hidden />

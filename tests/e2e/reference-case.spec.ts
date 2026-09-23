@@ -15,7 +15,7 @@
  *   EA  = 69e9 × 1.5e-4                  = 1.035e7 N      → 10.35 MN
  */
 import { expect, test } from "@playwright/test";
-import { freshModel, physical, setField, shown, unit } from "./helpers";
+import { freshModel, openTree, physical, setField, shown, unit } from "./helpers";
 
 test("reference case typed through the UI reproduces the hand calculation", async ({ page }) => {
   await freshModel(page);
@@ -34,6 +34,7 @@ test("reference case typed through the UI reproduces the hand calculation", asyn
   await setField(page, "field-h", "5");
   await setField(page, "field-E", "69");
   await setField(page, "field-rho", "2700");
+  await openTree(page);
   await page.getByTestId("tree-item-load-tip-01").click();
   await setField(page, "field-F", "100");
 
@@ -60,6 +61,7 @@ test("reference case typed through the UI reproduces the hand calculation", asyn
   await expect(shown(page, "tipStiffness")).toHaveText("64.69");
 
   // Section properties and derived values in the inspector.
+  await openTree(page);
   await page.getByTestId("tree-item-geo-beam-01").click();
   await expect(page.getByTestId("out-A")).toHaveText("150");
   await expect(page.getByTestId("out-Ixx")).toHaveText("312.5");

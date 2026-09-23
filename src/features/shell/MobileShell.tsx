@@ -26,10 +26,10 @@ function Sheet({ id, title, children }: { id: Exclude<MobileSheet, null>; title:
   return (
     <Dialog.Root open={open} onOpenChange={(o) => setSheet(o ? id : null)}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/35" />
+        <Dialog.Overlay className="mobile-sheet-overlay fixed inset-0 z-40 bg-black/35" forceMount />
         <Dialog.Content
-          className="fixed right-0 bottom-0 left-0 z-50 flex max-h-[62vh] flex-col rounded-t-lg border-t border-line-strong bg-panel shadow-[var(--shadow-pop)] outline-none"
-          style={{ animation: "sheet-in 180ms var(--ease)" }}
+          className="mobile-sheet fixed right-0 bottom-0 left-0 z-50 flex max-h-[62vh] flex-col rounded-t-lg border-t border-line-strong bg-panel shadow-[var(--shadow-pop)] outline-none"
+          forceMount
           aria-describedby={undefined}
           data-testid={`sheet-${id}`}
         >

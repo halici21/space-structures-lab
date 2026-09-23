@@ -36,12 +36,29 @@ for (const vp of VIEWPORTS) {
       await page.evaluate(() => localStorage.clear());
       await page.reload();
       await expect(page.getByTestId("empty-state")).toBeVisible();
+      await expect(page.getByTestId("reference-case-note")).toContainText("δ/L = 155%");
       await page.screenshot({ path: `${OUT}/${vp.name}-01-initial.png` });
       await noHorizontalOverflow(page);
 
       await freshModel(page);
+      if (vp.width >= 1024) {
+        const width = async (id: string) => (await page.locator(`#${id}`).boundingBox())!.width;
+        await expect.poll(() => width("tree")).toBeLessThan(1);
+        expect(await width("inspector")).toBeGreaterThan(280);
+      }
       await page.screenshot({ path: `${OUT}/${vp.name}-02-beam-selected.png` });
       await noHorizontalOverflow(page);
+
+      if (vp.width >= 1024) {
+        await page.getByTestId("toggle-tree").click();
+        await expect(page.getByTestId("toggle-tree")).toHaveAttribute("aria-expanded", "true");
+        await expect.poll(async () => (await page.locator("#tree").boundingBox())!.width).toBeGreaterThan(200);
+        await page.waitForTimeout(220);
+        await page.screenshot({ path: `${OUT}/${vp.name}-07-model-drawer.png` });
+        await noHorizontalOverflow(page);
+        await page.getByTestId("toggle-tree").click();
+        if (vp.width < 1180) await page.getByTestId("toggle-inspector").click();
+      }
 
       await page.getByTestId("ws-learn").click();
       await page.waitForTimeout(500);
@@ -75,6 +92,7 @@ test.describe("mobile-390x844", () => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
     await page.reload();
+    await expect(page.getByTestId("reference-case-note")).toContainText("0.25 m");
     await page.screenshot({ path: `${OUT}/mobile-390x844-01-initial.png` });
     await noHorizontalOverflow(page);
 

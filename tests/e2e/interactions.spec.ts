@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { camera, clickWorld, freshModel, setField, shown } from "./helpers";
+import { camera, clickWorld, freshModel, openTree, setField, shown } from "./helpers";
 
 const dist = (a: number[], b: number[]) => Math.hypot(a[0]! - b[0]!, a[1]! - b[1]!, a[2]! - b[2]!);
 
 test.describe("selection synchronisation", () => {
   test("tree → viewport → inspector", async ({ page }) => {
     await freshModel(page);
+    await openTree(page);
     await page.getByTestId("tree-item-load-tip-01").click();
     await expect(page.getByTestId("tree-item-load-tip-01")).toHaveAttribute("aria-selected", "true");
     await expect(page.getByTestId("inspector").getByRole("heading", { name: "Tip Force" })).toBeVisible();
@@ -35,6 +36,7 @@ test.describe("selection synchronisation", () => {
     await expect(page.locator('[data-testid^="tree-item-"][data-selected]')).toHaveCount(0);
 
     // Escape also clears.
+    await openTree(page);
     await page.getByTestId("tree-item-geo-beam-01").click();
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("tree-item-geo-beam-01")).toHaveAttribute("aria-selected", "false");
@@ -42,6 +44,7 @@ test.describe("selection synchronisation", () => {
 
   test("hover in the tree highlights in the viewport status", async ({ page }) => {
     await freshModel(page);
+    await openTree(page);
     await page.getByTestId("tree-item-con-fixed-01").hover();
     await expect(page.getByTestId("status-bar")).toContainText("Hover: Fixed Support");
   });
@@ -154,6 +157,7 @@ test.describe("live editing", () => {
 
   test("lateral load switches the governing second moment", async ({ page }) => {
     await freshModel(page);
+    await openTree(page);
     await page.getByTestId("tree-item-load-tip-01").click();
     await page.getByTestId("load-plane").getByRole("radio", { name: /lateral/ }).click();
     // Iyy / Ixx = (b/h)² = 36 → δ ÷ 36: 1546 mm → 42.94 mm
@@ -212,6 +216,7 @@ test.describe("explanations", () => {
     await expect(page.getByTestId("assumption-slender")).toHaveAttribute("data-status", "ok");
     // Shorten and unload the beam: every check passes.
     await setField(page, "field-L", "0.3");
+    await openTree(page);
     await page.getByTestId("tree-item-load-tip-01").click();
     await setField(page, "field-F", "5");
     await expect(page.getByTestId("status-chip")).toHaveAttribute("data-status", "ok");
@@ -250,12 +255,19 @@ test.describe("shell", () => {
     // A collapsed panel has zero width (toBeInViewport cannot tell: zero-area
     // elements report an intersection ratio of 1).
     const treeWidth = async () => (await page.locator("#tree").boundingBox())!.width;
-    expect(await treeWidth()).toBeGreaterThan(200);
-    await page.getByTestId("toggle-tree").click();
+    const inspectorWidth = async () => (await page.locator("#inspector").boundingBox())!.width;
     await expect.poll(treeWidth).toBeLessThan(1);
-    await expect(page.getByTestId("toggle-tree")).toHaveAttribute("aria-pressed", "false");
+    expect(await inspectorWidth()).toBeGreaterThan(280);
     await page.getByTestId("toggle-tree").click();
     await expect.poll(treeWidth).toBeGreaterThan(200);
+    await expect(page.getByTestId("toggle-tree")).toHaveAttribute("aria-expanded", "true");
+    await page.getByTestId("toggle-tree").click();
+    await expect.poll(treeWidth).toBeLessThan(1);
+    await page.getByTestId("toggle-inspector").click();
+    await expect.poll(inspectorWidth).toBeLessThan(1);
+    await expect(page.getByTestId("toggle-inspector")).toHaveAttribute("aria-expanded", "false");
+    await page.getByTestId("toggle-inspector").click();
+    await expect.poll(inspectorWidth).toBeGreaterThan(280);
 
     await page.getByTestId("dock-toggle").click();
     const dock = page.getByTestId("dock");
@@ -284,6 +296,7 @@ test.describe("shell", () => {
     await freshModel(page);
     await setField(page, "field-L", "0.7");
     await page.reload();
+    await openTree(page);
     await expect(page.getByTestId("tree-item-geo-beam-01")).toBeVisible();
     await page.getByTestId("tree-item-geo-beam-01").click();
     await expect(page.getByTestId("field-L")).toHaveValue("0.7");

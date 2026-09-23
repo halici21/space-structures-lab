@@ -12,6 +12,14 @@ export async function freshModel(page: Page) {
   await page.waitForTimeout(400);
 }
 
+/** Opens the on-demand model drawer in desktop layouts. */
+export async function openTree(page: Page) {
+  const toggle = page.getByTestId("toggle-tree");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByTestId("tree-item-geo-beam-01")).toBeVisible();
+}
+
 /** Types a value into an inspector field and commits it with Enter. */
 export async function setField(page: Page, testId: string, text: string) {
   const f = page.getByTestId(testId);
