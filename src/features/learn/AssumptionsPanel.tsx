@@ -79,10 +79,10 @@ export function AssumptionsPanel({ solved }: { solved: SolvedDocument }) {
     <div data-testid="assumptions-panel">
       <div className="mb-2 flex items-baseline gap-2">
         <h3 className="caps !text-fg">Euler–Bernoulli beam · model assumptions</h3>
-        <span className="text-[11px] text-faint">checked live against the current model</span>
+        <span className="text-[12px] text-faint">checked live against the current model</span>
       </div>
-      <table className="w-full text-[12px]">
-        <thead className="text-left text-[11px] text-faint">
+      <table className="w-full text-[13px]">
+        <thead className="text-left text-[12px] text-faint">
           <tr>
             <th className="w-6 pb-1 font-normal" />
             <th className="pb-1 font-normal">Assumption</th>

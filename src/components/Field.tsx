@@ -121,9 +121,9 @@ export function NumberField({
   const shown = draft ?? editableText(value, unit);
 
   return (
-    <div className="py-[3px]">
+    <div className="py-[4px]">
       <div className={GRID}>
-        <label htmlFor={id} className="truncate text-muted">
+        <label htmlFor={id} className="min-w-0 text-muted">
           {label}
         </label>
         <SymbolTex tex={symbol} />
@@ -180,9 +180,9 @@ export function ReadoutRow({
   const system = useLab((s) => s.unitSystem);
   const f = formatQuantity(value, kind, system);
   return (
-    <div className={GRID + " min-h-[24px]"}>
+    <div className={GRID + " min-h-[28px]"}>
       <span className="flex min-w-0 items-center gap-1.5 text-muted">
-        <span className="truncate">{label}</span>
+        <span className="min-w-0">{label}</span>
         {aside}
       </span>
       <SymbolTex tex={symbol} />
@@ -209,8 +209,8 @@ export function SelectRow({
 }) {
   const id = useId();
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,176px)] items-center gap-x-2 py-[3px]">
-      <label htmlFor={id} className="truncate text-muted">
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,176px)] items-center gap-x-2 py-[4px]">
+      <label htmlFor={id} className="min-w-0 text-muted">
         {label}
       </label>
       <select

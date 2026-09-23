@@ -17,10 +17,10 @@ export function Section({
   const id = useId();
   return (
     <section className="border-b border-line">
-      <div className="flex h-8 items-center gap-1 pr-3 pl-1.5">
+      <div className="flex h-9 items-center gap-1 pr-3 pl-1.5">
         <button
           type="button"
-          className="flex h-7 flex-1 cursor-pointer items-center gap-1 rounded-sm text-left"
+          className="flex h-8 flex-1 cursor-pointer items-center gap-1 rounded-sm text-left"
           aria-expanded={open}
           aria-controls={id}
           onClick={() => setOpen(!open)}

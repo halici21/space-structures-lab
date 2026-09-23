@@ -205,6 +205,7 @@ test.describe("explanations", () => {
     // What-changed decomposition after an edit.
     await setField(page, "field-L", "0.3");
     await expect(page.getByTestId("change-explainer")).toContainText("÷37");
+    await expect(page.getByTestId("learn-change")).toBeInViewport();
   });
 
   test("assumptions are disclosed and checked", async ({ page }) => {

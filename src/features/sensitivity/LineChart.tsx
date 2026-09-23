@@ -139,7 +139,7 @@ export function LineChart({
         {g.xt.map((v) => (
           <g key={"x" + v}>
             <line x1={g.X(v)} x2={g.X(v)} y1={M.t} y2={height - M.b} stroke="var(--line)" />
-            <text x={g.X(v)} y={height - M.b + 14} fontSize="10.5" textAnchor="middle" fill="var(--text-faint)" className="num">
+            <text x={g.X(v)} y={height - M.b + 14} fontSize="11.5" textAnchor="middle" fill="var(--text-faint)" className="num">
               {fmtX(v)}
             </text>
           </g>
@@ -147,16 +147,16 @@ export function LineChart({
         {g.yt.map((v) => (
           <g key={"y" + v}>
             <line x1={M.l} x2={width - M.r} y1={g.Y(v)} y2={g.Y(v)} stroke="var(--line)" />
-            <text x={M.l - 6} y={g.Y(v) + 3.5} fontSize="10.5" textAnchor="end" fill="var(--text-faint)" className="num">
+            <text x={M.l - 6} y={g.Y(v) + 3.5} fontSize="11.5" textAnchor="end" fill="var(--text-faint)" className="num">
               {fmtY(v)}
             </text>
           </g>
         ))}
         <rect x={M.l} y={M.t} width={width - M.l - M.r} height={height - M.t - M.b} fill="none" stroke="var(--line-strong)" />
-        <text x={(M.l + width - M.r) / 2} y={height - 3} fontSize="10.5" textAnchor="middle" fill="var(--text-muted)">
+        <text x={(M.l + width - M.r) / 2} y={height - 3} fontSize="11.5" textAnchor="middle" fill="var(--text-muted)">
           {xLabel}
         </text>
-        <text transform={`translate(11 ${(M.t + height - M.b) / 2}) rotate(-90)`} fontSize="10.5" textAnchor="middle" fill="var(--text-muted)">
+        <text transform={`translate(11 ${(M.t + height - M.b) / 2}) rotate(-90)`} fontSize="11.5" textAnchor="middle" fill="var(--text-muted)">
           {yLabel}
         </text>
 

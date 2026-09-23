@@ -79,6 +79,17 @@ for (const vp of VIEWPORTS) {
       await page.screenshot({ path: `${OUT}/${vp.name}-06-why.png` });
       await page.keyboard.press("Escape");
 
+      await page.getByTestId("ws-model").click();
+      await page.getByRole("button", { name: "Section properties" }).click();
+      await page.getByRole("button", { name: "Derived" }).click();
+      await expect(page.getByRole("button", { name: "Section properties" })).toHaveAttribute("aria-expanded", "true");
+      await expect(page.getByRole("button", { name: "Derived" })).toHaveAttribute("aria-expanded", "true");
+      await page.getByTestId("inspector").locator(".overflow-y-auto").evaluate((el) => { el.scrollTop = el.scrollHeight; });
+      await expect(page.getByTestId("out-mass")).toBeVisible();
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: `${OUT}/${vp.name}-08-inspector-details.png` });
+      await noHorizontalOverflow(page);
+
       expect(errors).toEqual([]);
     });
   });

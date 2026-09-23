@@ -65,7 +65,7 @@ export function WorkspaceTabs({ compact = false }: { compact?: boolean }) {
               aria-selected={active}
               disabled={!hasDoc && w.id !== "model"}
               className={
-                "relative cursor-pointer px-3 text-[11px] font-semibold tracking-[0.07em] uppercase transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 " +
+                "relative cursor-pointer px-3 text-[12px] font-semibold tracking-[0.055em] uppercase transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 " +
                 (active ? "text-fg" : "text-muted hover:text-fg") +
                 (compact ? " flex-1 px-1" : "")
               }
@@ -170,7 +170,7 @@ export function Toolbar({
   const setTheme = useLab((s) => s.setTheme);
   const hasDoc = useLab((s) => s.doc !== null);
   return (
-    <header className="flex h-10 shrink-0 items-stretch border-b border-line bg-panel" data-testid="toolbar">
+    <header className="flex h-11 shrink-0 items-stretch border-b border-line bg-panel" data-testid="toolbar">
       <div className="flex w-[257px] shrink-0 items-center gap-2 border-r border-line px-3 max-[1180px]:w-auto">
         <BrandMark />
         <span className="font-semibold tracking-[-0.005em] whitespace-nowrap text-fg">Space Structures Lab</span>

@@ -23,8 +23,8 @@ export function WhyButton({ which, solved, size = "sm" }: { which: WhyKey; solve
       <Popover.Trigger asChild>
         <button
           className={
-            "grid shrink-0 cursor-pointer place-items-center rounded-full border border-line-strong text-[10.5px] font-semibold text-muted transition-colors hover:border-accent hover:text-accent-text data-[state=open]:border-accent data-[state=open]:bg-accent-weak data-[state=open]:text-accent-text " +
-            (size === "sm" ? "h-[17px] w-[17px]" : "h-5 w-5")
+            "grid shrink-0 cursor-pointer place-items-center rounded-full border border-line-strong text-[11.5px] font-semibold text-muted transition-colors hover:border-accent hover:text-accent-text data-[state=open]:border-accent data-[state=open]:bg-accent-weak data-[state=open]:text-accent-text " +
+            (size === "sm" ? "h-5 w-5" : "h-[22px] w-[22px]")
           }
           aria-label={`Why? Explain ${RESULT_META[which].noun}`}
           data-why={which}
@@ -191,10 +191,10 @@ function WhyContent({ which, solved }: { which: WhyKey; solved: SolvedDocument }
   const drivers = rankDrivers(input, which);
 
   return (
-    <div className="max-h-[70vh] overflow-y-auto">
+    <div className="max-h-[55vh] overflow-y-auto" tabIndex={0} aria-label="Explanation details">
       <div className="border-b border-line px-3.5 pt-3 pb-2.5 pr-9">
         <p className="caps mb-1">Why?</p>
-        <h3 className="text-[13px] font-semibold text-fg">{titleFor(which, solved)}</h3>
+        <h3 className="text-[15px] font-semibold text-fg">{titleFor(which, solved)}</h3>
       </div>
       <div className="space-y-1 border-b border-line bg-app/40 px-3.5 py-2.5">
         {equationFor(which, vertical).map((t) => (
@@ -207,9 +207,9 @@ function WhyContent({ which, solved }: { which: WhyKey; solved: SolvedDocument }
           <div className="mb-2 text-muted">
             <Tex tex={proportionalityTex(which, drivers)} />
           </div>
-          <table className="num w-full text-[11.5px]">
+          <table className="num w-full text-[12.5px]">
             <thead>
-              <tr className="text-[10.5px] text-faint">
+              <tr className="text-[11.5px] text-faint">
                 <th className="w-4 pb-0.5 text-left font-normal" />
                 <th className="pb-0.5 text-left font-normal">Parameter</th>
                 <th className="pb-0.5 text-left font-normal">Power</th>
@@ -232,14 +232,14 @@ function WhyContent({ which, solved }: { which: WhyKey; solved: SolvedDocument }
             </tbody>
           </table>
           {which === "tipDeflection" && (
-            <p className="mt-2 text-[11.5px] text-muted">
+            <p className="mt-2 text-[12.5px] text-muted">
               For a rectangle <Tex tex={vertical ? "I \\propto h^3" : "I \\propto b^3"} />, therefore{" "}
               <Tex tex={vertical ? "\\delta \\propto 1/h^3" : "\\delta \\propto 1/b^3"} />.
             </p>
           )}
         </div>
       )}
-      <div className="space-y-2 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-muted">
+      <div className="space-y-2 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-muted">
         <p>{insightFor(which, solved)}</p>
         <p className="num">{contextFor(which, solved, system)}</p>
       </div>

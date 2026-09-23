@@ -99,7 +99,7 @@ export function SensitivityPanel({ solved }: { solved: SolvedDocument }) {
         </div>
       </div>
 
-      <aside className="min-h-0 overflow-y-auto border-l border-line pl-4 text-[11.5px] leading-snug max-[900px]:hidden">
+      <aside className="min-h-0 overflow-y-auto border-l border-line pl-4 text-[12.5px] leading-snug max-[900px]:hidden">
         <p className="caps mb-1">Scaling</p>
         <div className="mb-2 text-[13px] text-fg" data-testid="sens-law">
           {e === 0 ? (

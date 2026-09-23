@@ -121,7 +121,7 @@ export function DesktopShell() {
             id="inspector"
             panelRef={inspector}
             defaultSize="0px"
-            minSize="336px"
+            minSize="352px"
             maxSize="440px"
             collapsible
             collapsedSize="0px"

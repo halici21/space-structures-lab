@@ -8,6 +8,7 @@ export async function freshModel(page: Page) {
   await page.getByTestId("create-cantilever").click();
   await expect(page.locator("canvas")).toBeVisible();
   await page.waitForFunction(() => !!window.__ssl);
+  await expect.poll(() => page.evaluate(() => window.__ssl!.state().selection)).toBe("geo-beam-01");
   // Let the camera settle its first fit.
   await page.waitForTimeout(400);
 }

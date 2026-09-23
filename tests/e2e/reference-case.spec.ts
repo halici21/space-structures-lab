@@ -70,6 +70,8 @@ test("reference case typed through the UI reproduces the hand calculation", asyn
   // Section properties and derived values in the inspector.
   await openTree(page);
   await page.getByTestId("tree-item-geo-beam-01").click();
+  await page.getByRole("button", { name: "Section properties" }).click();
+  await page.getByRole("button", { name: "Derived" }).click();
   await expect(page.getByTestId("out-A")).toHaveText("150");
   await expect(page.getByTestId("out-Ixx")).toHaveText("312.5");
   await expect(page.getByTestId("out-Iyy")).toHaveText("11250");

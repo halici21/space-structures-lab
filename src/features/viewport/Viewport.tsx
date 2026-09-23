@@ -142,7 +142,9 @@ export default function Viewport({
       ref={box}
       className="relative h-full w-full overflow-hidden bg-viewport"
       data-testid="viewport"
-      onPointerDown={(e) => (down.current = { x: e.clientX, y: e.clientY })}
+      onPointerDown={(e) => {
+        down.current = e.target instanceof HTMLCanvasElement ? { x: e.clientX, y: e.clientY } : null;
+      }}
       onPointerEnter={() => setPointerInside(true)}
       onPointerLeave={() => setPointerInside(false)}
       style={{ cursor: pointerInside && hoveringObject ? "pointer" : undefined }}
@@ -156,7 +158,11 @@ export default function Viewport({
           aria-label={description}
           onPointerMissed={(e) => {
             const d = down.current;
-            if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) return;
+            // Only a click that began in the viewport may clear selection.
+            // The first click on Create can finish as the canvas mounts beneath it.
+            if (!d) return;
+            down.current = null;
+            if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) return;
             select(null);
           }}
         >

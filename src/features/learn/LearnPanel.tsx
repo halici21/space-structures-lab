@@ -15,9 +15,9 @@ import { doublingSentence, factorText, powerTex } from "./explain";
 
 export type LearnTopic = "stiffness" | "deflection" | "stress" | "change";
 
-function Topic({ id, title, children }: { id: LearnTopic; title: string; children: ReactNode }) {
+function Topic({ id, title, children, className = "" }: { id: LearnTopic; title: string; children: ReactNode; className?: string }) {
   return (
-    <section id={`learn-${id}`} className="min-w-0 scroll-mt-2 rounded-sm" data-testid={`learn-${id}`}>
+    <section id={`learn-${id}`} className={"min-w-0 scroll-mt-2 rounded-sm " + className} data-testid={`learn-${id}`}>
       <h3 className="caps mb-2 !text-fg">{title}</h3>
       {children}
     </section>
@@ -43,15 +43,22 @@ function Bullet({ lead, children }: { lead: ReactNode; children: ReactNode }) {
 
 export function LearnPanel({ solved }: { solved: SolvedDocument }) {
   const system = useLab((s) => s.unitSystem);
+  const hasEdit = useLab((s) => s.reference !== null);
   const r = solved.result;
   const input = r.input;
   const vertical = input.load.plane === "vertical";
   const deep = vertical ? "h" : "b";
   const q = (v: number, k: Parameters<typeof formatQuantityText>[1]) => formatQuantityText(v, k, system);
   const doubledL = solveCantilever(withParameter(input, "L", input.length * 2));
+  const changeTopic = (
+    <Topic id="change" title="What just changed" className="col-span-full border-t border-line pt-3">
+      <ChangeExplainer solved={solved} />
+    </Topic>
+  );
 
   return (
-    <div className="grid grid-cols-4 gap-x-6 gap-y-5 text-[12px] leading-relaxed max-[1180px]:grid-cols-2 max-[640px]:grid-cols-1" data-testid="learn-panel">
+    <div className="grid grid-cols-3 gap-x-7 gap-y-5 text-[13px] leading-relaxed max-[1180px]:grid-cols-2 max-[640px]:grid-cols-1" data-testid="learn-panel">
+      {hasEdit && changeTopic}
       <Topic id="stiffness" title="Stiffness">
         <Eq tex="k_{tip} = \dfrac{3\,E\,I}{L^3}" />
         <p className="mb-1.5 text-muted">
@@ -98,9 +105,7 @@ export function LearnPanel({ solved }: { solved: SolvedDocument }) {
         </p>
       </Topic>
 
-      <Topic id="change" title="What just changed">
-        <ChangeExplainer solved={solved} />
-      </Topic>
+      {!hasEdit && changeTopic}
     </div>
   );
 }
@@ -144,7 +149,7 @@ export function ChangeExplainer({ solved }: { solved: SolvedDocument }) {
           </li>
         ))}
       </ul>
-      <table className="num w-full text-[11.5px]">
+      <table className="num w-full text-[12.5px]">
         <thead>
           <tr className="text-left text-faint">
             <th className="pb-1 font-normal">Result</th>

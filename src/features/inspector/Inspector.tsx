@@ -56,7 +56,7 @@ export function Inspector({ showTitle = true }: { showTitle?: boolean }) {
           <ProjectInspector solved={solved.value} />
         ) : (
           <>
-            <p className="border-b border-line px-3 py-1.5 text-[11.5px] text-faint">
+            <p className="border-b border-line px-3 py-1.5 text-[12.5px] text-faint">
               {!showTitle && <span className="mr-1.5 font-medium text-fg">{entity.name}</span>}
               {KIND_LABEL[entity.category]}
             </p>
@@ -92,7 +92,7 @@ function BeamInspector({ solved }: { solved: SolvedDocument }) {
 
       <MaterialInspector solved={solved} />
 
-      <Section title="Section properties">
+      <Section title="Section properties" defaultOpen={false}>
         <ReadoutRow label="Area" symbol="A" value={result.section.area} kind="area" testId="out-A" />
         <ReadoutRow
           label="About x–x"
@@ -111,13 +111,13 @@ function BeamInspector({ solved }: { solved: SolvedDocument }) {
           testId="out-Iyy"
         />
         <ReadoutRow label="Extreme fibre" symbol="c" value={result.c} kind="sectionDim" />
-        <p className="mt-1.5 text-[11px] leading-snug text-faint">
+        <p className="mt-1.5 text-[12px] leading-snug text-faint">
           I<sub>xx</sub> = bh³/12, I<sub>yy</sub> = hb³/12. The tip load is {governsX ? "vertical" : "lateral"}, so{" "}
           {governsX ? "Ixx" : "Iyy"} carries it.
         </p>
       </Section>
 
-      <Section title="Derived">
+      <Section title="Derived" defaultOpen={false}>
         <ReadoutRow label="Axial stiffness" symbol="EA" value={result.EA} kind="axialStiffness" testId="out-EA" />
         <ReadoutRow label="Flexural stiffness" symbol="EI" value={result.EI} kind="flexuralStiffness" testId="out-EI" />
         <ReadoutRow label="Tip stiffness" symbol="k_{tip}" value={result.tipStiffness} kind="tipStiffness" testId="out-k" />
@@ -153,20 +153,20 @@ export function MaterialInspector({ solved, standalone = false }: { solved: Solv
           Custom{custom ? "" : " — edit any value"}
         </option>
       </SelectRow>
-      {custom && <p className="mb-1 text-right text-[11px] text-faint">{material.name}</p>}
+      {custom && <p className="mb-1 text-right text-[12px] text-faint">{material.name}</p>}
       <NumberField param="E" kind="modulus" label="Young's modulus" symbol="E" value={material.E} testId="field-E" />
       <NumberField param="rho" kind="density" label="Density" symbol="\rho" value={material.rho} testId="field-rho" />
       <NumberField param="nu" kind="poisson" label="Poisson's ratio" symbol="\nu" value={material.nu} testId="field-nu" />
       <NumberField param="strength" kind="stress" label={strengthLabel} symbol="\sigma_y" value={material.strength} testId="field-strength" />
       {preset?.simplified && (
-        <p className="mt-2 flex gap-1.5 rounded-sm bg-[var(--caution-weak)] p-2 text-[11px] leading-snug text-caution" data-testid="cfrp-note">
+        <p className="mt-2 flex gap-1.5 rounded-sm bg-[var(--caution-weak)] p-2 text-[12px] leading-snug text-caution" data-testid="cfrp-note">
           <AlertTriangle size={13} className="mt-px shrink-0" aria-hidden />
           <span>
             <b className="font-semibold">Simplified isotropic / educational.</b> {preset.note}
           </span>
         </p>
       )}
-      <p className="mt-1.5 text-[11px] text-faint">
+      <p className="mt-1.5 text-[12px] text-faint">
         ν is used only for the shear-deformation check (G = E/2(1+ν)).
         {standalone && <> Assigned to {beam.name}.</>}
       </p>
@@ -183,18 +183,18 @@ function SupportInspector({ solved }: { solved: SolvedDocument }) {
       <Section title="Fixed support">
         <Fact label="Location">{resolved.beam.name} · root, z = 0</Fact>
         <Fact label="Restrains">all 6 DOF (u, v, w, θx, θy, θz)</Fact>
-        <p className="mt-1.5 text-[11px] leading-snug text-faint">
+        <p className="mt-1.5 text-[12px] leading-snug text-faint">
           A clamp: no displacement and no rotation at the root, so v(0) = 0 and v′(0) = 0.
         </p>
       </Section>
       <Section title="Reactions">
         <ReadoutRow label="Shear force" symbol="R" value={result.rootShear} kind="force" testId="out-reaction" />
         <ReadoutRow label="Moment" symbol="M_R" value={result.rootMoment} kind="moment" testId="out-reaction-moment" />
-        <p className="mt-1.5 text-[11px] leading-snug text-faint">
+        <p className="mt-1.5 text-[12px] leading-snug text-faint">
           Equilibrium of the whole beam: R = F and M<sub>R</sub> = F·L. They do not depend on E or the section.
         </p>
       </Section>
-      <p className="px-3 py-2.5 text-[11px] text-faint">Pinned, spring and joint supports need the beam FEM solver (roadmap M8).</p>
+      <p className="px-3 py-2.5 text-[12px] text-faint">Pinned, spring and joint supports need the beam FEM solver (roadmap M8).</p>
     </>
   );
 }
@@ -221,7 +221,7 @@ function LoadInspector({ solved }: { solved: SolvedDocument }) {
       <Fact label="Bends about">
         {plane === "vertical" ? "x–x  (uses Ixx)" : "y–y  (uses Iyy)"}
       </Fact>
-      <p className="mt-1.5 text-[11px] leading-snug text-faint">
+      <p className="mt-1.5 text-[12px] leading-snug text-faint">
         Static dead load: its direction stays fixed as the beam deflects.
       </p>
     </Section>
@@ -261,7 +261,7 @@ function AnalysisInspector({ solved }: { solved: SolvedDocument }) {
           <span className={"chip " + cls}>{text}</span>
         </Fact>
         {(violated > 0 || caution > 0) && (
-          <p className="mt-1 text-[11px] text-muted">
+          <p className="mt-1 text-[12px] text-muted">
             {violated > 0 && <>{violated} violated</>}
             {violated > 0 && caution > 0 && " · "}
             {caution > 0 && <>{caution} near limit</>}.{" "}
@@ -289,7 +289,7 @@ function AnalysisInspector({ solved }: { solved: SolvedDocument }) {
             onChange={(v) => setView({ contour: v })}
           />
         </div>
-        <p className="mt-1 text-[11px] text-faint">Auto shows the contour in the Analyze workspace.</p>
+        <p className="mt-1 text-[12px] text-faint">Auto shows the contour in the Analyze workspace.</p>
       </Section>
       <Section title="Analysis types">
         <ul className="space-y-0.5">
@@ -331,7 +331,7 @@ function ProjectInspector({ solved }: { solved: SolvedDocument }) {
             </option>
           ))}
         </SelectRow>
-        <p className="mt-1 text-[11px] text-faint">Display only. The model is always stored in SI.</p>
+        <p className="mt-1 text-[12px] text-faint">Display only. The model is always stored in SI.</p>
       </Section>
       <p className="px-3 py-3 text-muted">Select an item in the tree, or click the beam, support or load in the viewport.</p>
     </>

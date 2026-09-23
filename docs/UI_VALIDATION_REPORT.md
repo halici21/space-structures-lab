@@ -324,3 +324,41 @@ visible model-validity context, addressed above.
   discoverability needs observation with first-time users. The long inspector
   still requires scrolling, and the physical mobile-device review remains
   outstanding.
+
+## 12. Typography and composition revision — 2026-09-24
+
+This pass reviewed the first screen, selected beam, Learn and Analyze docks,
+the Why? explanation, Inspector details, mobile sheets, and light theme against
+the product specification's requirement for a dense but calm, viewport-first
+engineering workspace.
+
+| Priority | Observed issue | Revision |
+|---|---|---|
+| P2 | The 12 px base and frequent 10.5–11.5 px labels made the interface read smaller than its available space suggested. | UI stack now starts with the available Segoe UI Variable/Text fonts on Windows and system fonts elsewhere; base text is 13 px. Main labels and controls are roughly 12–13 px, primary result numbers 17 px, and the start title 18 px. Numeric alignment remains tabular. No external font request was introduced. |
+| P2 | The Inspector presented editable inputs and calculated properties as one continuous column. | Geometry and Material remain open. Section Properties and Derived open from their headers; all values and units are retained. Inspector minimum width is 352 px, so labels no longer need forced ellipsis. |
+| P2 | Learn used four equal columns even when the “What just changed” column contained only an instruction. | Stiffness, Deflection, and Stress form three readable columns on wide screens, two on laptop, one on mobile. The change explanation spans a separate row and moves above the concepts immediately after an edit. |
+| P3 | The Why? popover reached the top edge and covered workspace navigation. | Explanation height is capped at 55 vh with internal scrolling. Its heading, driver table, and supporting text use a larger type scale. |
+| P3 | Graph ticks and the mobile status/result labels were unnecessarily small. | Tick labels, mobile panel navigation, and live result readout were enlarged within their existing surfaces. |
+| P2 | A rare first-run click could finish while the canvas was mounting and clear the beam selection, leaving the Inspector on Project instead of Beam. | Empty-viewport clicks now clear selection only when their pointer-down began inside the viewport. The first-run browser helper asserts that Beam 01 is selected. |
+
+The dock strip and its tabs gained 8 px and 4 px respectively; the Inspector
+gained 16 px. The 3D model remains the center of the default Model screen:
+at 1024 × 768, its visible viewport is about 672 px wide and 600 px high with
+the dock collapsed. The expanded Learn/Analyze docks still reduce viewport
+height substantially on a laptop; dock resizing and collapse remain available.
+
+The regenerated desktop and laptop screenshots include a new
+`*-08-inspector-details.png` state with both calculated-property groups open
+and the Inspector scrolled to their values. Reviewed dark and light themes at
+1280 × 900, 1440 × 1000, 1024 × 768,
+and mobile 390 × 844. No page-level horizontal overflow or console error was
+observed in those captures.
+
+The capped Why? explanation is keyboard-focusable, so its longer contents can
+be scrolled without a pointer. The affected accessibility and material-edit
+flows passed in three consecutive browser runs after this correction.
+
+Final verification: all 32 Playwright tests passed (27 interaction/reference/
+accessibility and 5 visual captures); TypeScript passed; all 131 unit tests
+passed; the production Vite build succeeded. This is a browser review at the
+listed sizes, not a physical-device or manual screen-reader study.

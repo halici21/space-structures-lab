@@ -68,7 +68,7 @@ export function ResultStrip({ solved, compact = false }: { solved: SolvedDocumen
   const invalid = Object.keys(fieldErrors);
 
   return (
-    <div className="flex h-12 min-w-0 items-stretch" data-testid="result-strip">
+    <div className="flex h-14 min-w-0 items-stretch" data-testid="result-strip">
       {!compact && (
         <div className="flex shrink-0 flex-col justify-center gap-0.5 border-r border-line pr-3 pl-3">
           <span className="caps !text-fg">Static bending</span>
@@ -103,10 +103,10 @@ export function ResultStrip({ solved, compact = false }: { solved: SolvedDocumen
           return (
             <div
               key={key}
-              className="flex min-w-[124px] flex-1 flex-col justify-center border-r border-line px-3 last:border-r-0"
+              className="flex min-w-[140px] flex-1 flex-col justify-center border-r border-line px-3 last:border-r-0"
               data-testid={`result-${key}`}
             >
-              <dt className="flex items-center gap-1 truncate text-[11px] text-muted">
+              <dt className="flex items-center gap-1 truncate text-[12px] text-muted">
                 <span className="truncate" title={meta.label}>
                   {meta.short ?? meta.label}
                 </span>
@@ -115,10 +115,10 @@ export function ResultStrip({ solved, compact = false }: { solved: SolvedDocumen
                 </span>
               </dt>
               <dd className="flex items-center gap-1.5">
-                <span className="num text-[14px] font-medium text-fg" data-testid={`value-${key}`}>
+                <span className="num text-[17px] font-semibold leading-tight text-fg" data-testid={`value-${key}`}>
                   {f.value}
                 </span>
-                <span className="text-[11.5px] text-muted" data-testid={`unit-${key}`}>
+                <span className="text-[12px] text-muted" data-testid={`unit-${key}`}>
                   {f.unit}
                 </span>
                 {ref && <RatioChip now={solved.result[key]} before={ref.result[key]} field={ref.field} />}
@@ -132,7 +132,7 @@ export function ResultStrip({ solved, compact = false }: { solved: SolvedDocumen
 
       {!compact && (
         <button
-          className="shrink-0 border-l border-line px-3 text-[11.5px] font-medium text-accent-text hover:bg-hover"
+          className="shrink-0 border-l border-line px-3 text-[12.5px] font-medium text-accent-text hover:bg-hover"
           onClick={() => setDockTab("details")}
           data-testid="all-results"
         >

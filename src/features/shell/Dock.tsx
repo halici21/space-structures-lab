@@ -19,11 +19,11 @@ const TABS: { id: DockTab; label: string }[] = [
   { id: "assumptions", label: "Assumptions" },
 ];
 
-const STRIP = 48;
-const TABBAR = 32;
+const STRIP = 56;
+const TABBAR = 36;
 const MIN_PANEL = 150;
 /** Toolbar + ribbon + status bar height [px]. */
-const CHROME = 98;
+const CHROME = 104;
 const MIN_VIEWPORT = 320;
 
 export function DockTabs({ compact = false }: { compact?: boolean }) {
@@ -37,7 +37,7 @@ export function DockTabs({ compact = false }: { compact?: boolean }) {
     requestAnimationFrame(() => document.getElementById(`dock-tab-${next.id}`)?.focus());
   };
   return (
-    <div role="tablist" aria-label="Analysis panel" className={"flex h-8 shrink-0 items-stretch gap-1 border-b border-line px-2 " + (compact ? "overflow-x-auto" : "")} onKeyDown={onKey}>
+    <div role="tablist" aria-label="Analysis panel" className={"flex h-9 shrink-0 items-stretch gap-1 border-b border-line px-2 " + (compact ? "overflow-x-auto" : "")} onKeyDown={onKey}>
       {TABS.map((t) => {
         const active = t.id === dockTab;
         return (
@@ -84,14 +84,14 @@ export function DockPanel({ solved }: { solved: SolvedDocument }) {
 }
 
 /** Reading tabs need more room than the results table. Heights are per tab and user-resizable. */
-const DEFAULT_HEIGHT: Record<DockTab, number> = { details: 290, sensitivity: 330, learn: 430, assumptions: 360 };
+const DEFAULT_HEIGHT: Record<DockTab, number> = { details: 310, sensitivity: 340, learn: 430, assumptions: 370 };
 
 export function Dock({ solved }: { solved: SolvedDocument }) {
   const dockOpen = useLab((s) => s.dockOpen);
   const dockTab = useLab((s) => s.dockTab);
   const setDockTab = useLab((s) => s.setDockTab);
   const [heights, setHeights] = useState(DEFAULT_HEIGHT);
-  const noticeHeight = solved.status === "violated" || solved.status === "caution" ? 40 : 0;
+  const noticeHeight = solved.status === "violated" || solved.status === "caution" ? 44 : 0;
   const closedHeight = STRIP + noticeHeight;
   const minHeight = closedHeight + TABBAR + MIN_PANEL;
   // The viewport stays the centre of gravity: it always keeps at least MIN_VIEWPORT px.

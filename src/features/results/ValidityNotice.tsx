@@ -38,11 +38,11 @@ export function ValidityNotice({
   return (
     <div
       className={
-        "flex min-w-0 items-center gap-2 border-b px-3 py-1.5 text-[11.5px] leading-snug " +
+        "flex min-w-0 items-center gap-2 border-b px-3 py-1.5 text-[12.5px] leading-snug " +
         (violated
           ? "border-violated/25 bg-[var(--violated-weak)] text-violated"
           : "border-caution/25 bg-[var(--caution-weak)] text-caution") +
-        (compact ? " flex-wrap" : " min-h-10")
+        (compact ? " flex-wrap" : " min-h-11")
       }
       role="status"
       data-testid="validity-notice"
@@ -51,7 +51,7 @@ export function ValidityNotice({
       <AlertTriangle size={14} className="shrink-0" aria-hidden />
       <strong className="shrink-0 font-semibold">{violated ? "Outside model assumptions" : "Near model limits"}</strong>
       <span className="min-w-0 text-fg">
-        {details}{remainder}. {violated ? "These linear results are illustrative, not reliable predictions." : "Check the limits before interpreting results."}
+        {details}{remainder}. {violated ? "Linear prediction is unreliable here." : "Check limits before interpreting results."}
       </span>
       <button className="ml-auto shrink-0 cursor-pointer font-medium underline underline-offset-2" onClick={onReview}>
         Review assumptions

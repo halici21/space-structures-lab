@@ -89,10 +89,10 @@ export function MobileShell() {
             data-testid="mobile-result-chip"
             data-status={ok.status}
           >
-            <span className={"caps !text-[10px] " + (ok.status === "violated" ? "!text-violated" : ok.status === "caution" ? "!text-caution" : "")}>
+            <span className={"caps !text-[11.5px] " + (ok.status === "violated" ? "!text-violated" : ok.status === "caution" ? "!text-caution" : "")}>
               {ok.status === "violated" ? "Outside assumptions" : ok.status === "caution" ? "Near limits" : "Static bending"}
             </span>
-            <span className="num text-[12px] text-fg">
+            <span className="num text-[13px] text-fg">
               δ {formatQuantityText(ok.result.tipDeflection, "displacement", system)} · σ{" "}
               {formatQuantityText(ok.result.maxBendingStress, "stress", system, 3)}
             </span>
@@ -103,7 +103,7 @@ export function MobileShell() {
       {ok && (
         <nav className="grid h-14 shrink-0 grid-cols-4 border-t border-line bg-panel pb-[env(safe-area-inset-bottom)]" aria-label="Panels">
           {nav.map((n) => (
-            <button key={n.id} className="flex cursor-pointer flex-col items-center justify-center gap-0.5 text-[11px] text-muted active:text-fg" onClick={() => setSheet(n.id)} data-testid={`mobile-nav-${n.id}`}>
+            <button key={n.id} className="flex cursor-pointer flex-col items-center justify-center gap-0.5 text-[12px] text-muted active:text-fg" onClick={() => setSheet(n.id)} data-testid={`mobile-nav-${n.id}`}>
               {n.icon}
               {n.label}
             </button>
