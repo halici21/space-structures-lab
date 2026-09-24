@@ -2,7 +2,7 @@
  * First-run guide. Each step completes on a real user action (tracked in the
  * store), and each "Show me" focuses the control that performs it.
  */
-import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, ChevronUp, X } from "lucide-react";
 import { useEffect } from "react";
 import { formatNumber, formatQuantityText } from "@/core/units";
 import { solveCantilever } from "@/lib/structures/cantilever";
@@ -17,10 +17,16 @@ type Step = Exclude<keyof OnboardingState, "dismissed" | "collapsed">;
 export const GUIDE_WIDTH = 252;
 
 function focusParam(param: string) {
-  requestAnimationFrame(() => {
+  const focusWhenReady = (attempt: number) => {
     const el = document.querySelector<HTMLInputElement>(`input[data-param="${param}"]`);
-    el?.focus();
-  });
+    if (!el) return;
+    if (el.closest("[inert]") || el.getBoundingClientRect().width === 0) {
+      if (attempt < 30) requestAnimationFrame(() => focusWhenReady(attempt + 1));
+      return;
+    }
+    el.focus();
+  };
+  requestAnimationFrame(() => focusWhenReady(0));
 }
 
 /**
@@ -109,6 +115,12 @@ export function Onboarding({
   ];
   const done = steps.filter((s) => onboarding[s.id]).length;
   const next = steps.find((s) => !onboarding[s.id]);
+  const firstExperiment =
+    workspace === "model" && variant === "overlay" && collapsed && !forceCollapsed && !onboarding.lengthChanged &&
+    solved?.ok && solved.value.result.deflectionRatio > 0.1;
+  const suggestedLength = solved?.ok
+    ? lengthForDeflectionRatio(solved.value.result.input, solved.value.result.EI)
+    : Number.NaN;
 
   return (
     <section
@@ -117,13 +129,13 @@ export function Onboarding({
           ? "absolute top-2 left-2 rounded-md border border-line bg-panel/95 backdrop-blur-sm"
           : "mx-2 mb-2 rounded-md border border-line bg-raised/60"
       }
-      style={variant === "overlay" ? { width: collapsed ? "auto" : GUIDE_WIDTH } : undefined}
+      style={variant === "overlay" ? { width: collapsed && !firstExperiment ? "auto" : GUIDE_WIDTH } : undefined}
       aria-label="Getting started"
       data-testid="onboarding"
       data-variant={variant}
     >
       <header className="flex h-8 items-center gap-2 pr-1 pl-2.5">
-        <span className="caps flex-1">{variant === "overlay" && collapsed ? "Guide" : "Get started"}</span>
+        <span className="caps flex-1">{firstExperiment ? "First experiment" : variant === "overlay" && collapsed ? "Guide" : "Get started"}</span>
         <span className="num text-[11px] text-faint">{done}/4</span>
         <button
           className="icon-btn h-6 w-6"
@@ -138,6 +150,16 @@ export function Onboarding({
           <X size={14} />
         </button>
       </header>
+      {firstExperiment && Number.isFinite(suggestedLength) && (
+        <button
+          className="flex w-full cursor-pointer items-center justify-between gap-2 border-t border-line px-2.5 py-2 text-left text-[12px] text-fg hover:bg-hover focus-visible:bg-hover"
+          onClick={steps[0]!.show}
+          data-testid="guide-first-experiment"
+        >
+          <span>Try L = <span className="num font-semibold">{formatQuantityText(suggestedLength, "span", system)}</span></span>
+          <ArrowRight size={14} className="shrink-0 text-accent-text" aria-hidden />
+        </button>
+      )}
       {!collapsed && (
         <ol className="px-1.5 pb-1.5">
           {steps.map((s, i) => {

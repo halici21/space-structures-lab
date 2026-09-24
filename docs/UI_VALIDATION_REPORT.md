@@ -396,3 +396,30 @@ production Vite build passed. One transient browser-test failure during an
 earlier run came from the development-only viewport hook not being ready after
 a page refresh; the point-click helper now waits for the hook. The complete
 suite passed on the subsequent run.
+
+## 14. First experiment and model validity — 2026-09-24
+
+The product specification recommends a 1 m reference beam and a guided first
+edit of beam length. That reference case produces δ/L ≈ 155% and stress above
+yield. The warning explained the limits, but the collapsed guide showed only
+“0/4,” leaving the next action hidden. On the phone, the warning in Results
+offered assumptions but no route to the relevant input.
+
+On the initial Model screen, the compact guide now shows a single experiment:
+“Try L = 0.25 m.” It derives the suggested length from the live deflection
+ratio, rounds it down inside the small-deflection threshold, and focuses the
+beam's length field when chosen. The cue disappears after a length edit; the
+guide's existing progress and full explanation remain available. Other
+workspaces keep the smaller collapsed guide. In the phone Results sheet, the
+same experiment opens Properties with Beam 01 selected and focuses Length.
+Neither action silently changes the engineering model.
+
+Reviewed the selected-beam view at desktop and laptop sizes and the phone
+Results sheet. The cue stays clear of the beam and viewport tools. Dedicated
+browser flows cover the desktop and phone paths. The 1 m starting case remains
+deliberately outside the model assumptions; first-time comprehension still
+needs observation with actual users.
+
+Final verification: 35 Playwright flows, 131 unit tests, TypeScript, and the
+production Vite build passed. The regenerated selected-beam and phone Results
+screenshots document the revised first action.

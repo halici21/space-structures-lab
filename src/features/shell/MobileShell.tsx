@@ -7,9 +7,11 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { BookOpen, ChartLine, ListTree, SlidersHorizontal, X } from "lucide-react";
 import { lazy, Suspense, useState, type ReactNode } from "react";
 import { formatQuantityText } from "@/core/units";
+import { IDS } from "@/model/document";
 import { useLab, useSolved, type MobileSheet } from "@/state/store";
 import { Inspector } from "../inspector/Inspector";
 import { AssumptionsPanel } from "../learn/AssumptionsPanel";
+import { lengthForDeflectionRatio } from "../learn/explain";
 import { LearnPanel } from "../learn/LearnPanel";
 import { LibraryDialog } from "../library/Library";
 import { ResultDetails } from "../results/ResultDetails";
@@ -51,9 +53,19 @@ function Sheet({ id, title, children }: { id: Exclude<MobileSheet, null>; title:
 export function MobileShell() {
   const solved = useSolved();
   const setSheet = useLab((s) => s.setMobileSheet);
+  const select = useLab((s) => s.select);
   const system = useLab((s) => s.unitSystem);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const ok = solved?.ok ? solved.value : null;
+  const lengthSuggestion = ok && ok.result.deflectionRatio > 0.1
+    ? lengthForDeflectionRatio(ok.result.input, ok.result.EI)
+    : null;
+
+  const editLength = () => {
+    select(IDS.beam);
+    setSheet("inspector");
+    requestAnimationFrame(() => document.querySelector<HTMLInputElement>('[data-testid="sheet-inspector"] input[data-param="L"]')?.focus());
+  };
 
   const nav: { id: Exclude<MobileSheet, null>; label: string; icon: ReactNode }[] = [
     { id: "tree", label: "Model", icon: <ListTree size={17} /> },
@@ -121,6 +133,16 @@ export function MobileShell() {
           </Sheet>
           <Sheet id="results" title="Results">
             <ValidityNotice solved={ok} onReview={() => setSheet("learn")} compact />
+            {lengthSuggestion !== null && Number.isFinite(lengthSuggestion) && (
+              <button
+                className="mx-3 mt-2 flex w-[calc(100%-24px)] cursor-pointer items-center justify-between rounded-sm border border-accent/30 bg-accent-weak px-3 py-2.5 text-left text-[12.5px] text-accent-text"
+                onClick={editLength}
+                data-testid="mobile-first-experiment"
+              >
+                <span>Try L = <span className="num font-semibold">{formatQuantityText(lengthSuggestion, "span", system)}</span> in Properties</span>
+                <span aria-hidden>→</span>
+              </button>
+            )}
             <div className="p-3">
               <ResultDetails solved={ok} />
             </div>
