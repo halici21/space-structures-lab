@@ -246,14 +246,14 @@ export interface LabelAnchor {
 export function labelAnchors(
   r: CantileverResult,
   s: number,
-  opts: { deformed: boolean; showForce: boolean; showDimensions: boolean },
+  opts: { deformed: boolean; showForce: boolean; showDimensions: boolean; forceLengthFraction?: number },
 ): LabelAnchor[] {
   const L = r.input.length;
   const { p, halfP } = bendingAxes(r);
   const out: LabelAnchor[] = [];
   if (opts.showForce) {
     const tip = opts.deformed ? stationFrame(r, L, s).center : ([0, 0, L] as Vec3);
-    out.push({ id: "force", position: add(tip, p, halfP + arrowLength(r) + 0.035 * L), align: "center" });
+    out.push({ id: "force", position: add(tip, p, halfP + arrowLength(r) * (opts.forceLengthFraction ?? 1) + 0.035 * L), align: "center" });
   }
   if (opts.showDimensions) {
     const d = lengthDimension(r);

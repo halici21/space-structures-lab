@@ -129,6 +129,7 @@ export function FixedSupportGlyph({
 export function ForceArrow({
   result,
   scale,
+  loadFraction,
   deformed,
   palette,
   selected,
@@ -138,6 +139,7 @@ export function ForceArrow({
 }: {
   result: CantileverResult;
   scale: number;
+  loadFraction: number;
   deformed: boolean;
   palette: ScenePalette;
 } & Pickable) {
@@ -156,7 +158,7 @@ export function ForceArrow({
   const color = selected || hovered ? palette.accent : palette.force;
 
   return (
-    <group name="force" position={apex} rotation={rotation} onClick={onSelect} {...hoverHandlers(onHover)}>
+    <group name="force" position={apex} rotation={rotation} scale={[1, Math.max(0.05, loadFraction), 1]} onClick={onSelect} {...hoverHandlers(onHover)}>
       <mesh position={[0, coneLen / 2, 0]} rotation={[Math.PI, 0, 0]}>
         <coneGeometry args={[coneR, coneLen, 24]} />
         <meshStandardMaterial color={color} roughness={0.5} transparent opacity={zero ? 0.35 : 1} />

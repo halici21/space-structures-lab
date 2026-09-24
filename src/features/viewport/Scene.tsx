@@ -28,6 +28,7 @@ export function Scene({
   palette,
   autoFrame,
   reducedMotion,
+  loadFraction,
   labels,
   labelNodes,
   insets,
@@ -36,6 +37,7 @@ export function Scene({
   palette: ScenePalette;
   autoFrame: boolean;
   reducedMotion: boolean;
+  loadFraction: number;
   labels: LabelSpec[];
   labelNodes: LabelNodes;
   insets: Insets;
@@ -50,10 +52,12 @@ export function Scene({
   const cameraCommand = useLab((s) => s.cameraCommand);
 
   const scale = displayScale(view.deformScale, result);
-  const s = view.showDeformed ? scale.factor : 0;
+  const fullScale = view.showDeformed ? scale.factor : 0;
+  const s = fullScale * loadFraction;
   const contour = contourEnabled(view, workspace) && view.showDeformed;
 
-  const bounds = useMemo(() => sceneBounds(result, s, view.showDeformed), [result, s, view.showDeformed]);
+  // Frame for the target shape so the camera stays still during a load ramp.
+  const bounds = useMemo(() => sceneBounds(result, fullScale, view.showDeformed), [result, fullScale, view.showDeformed]);
   const boundsFor = (target: string | undefined): Bounds => {
     const L = result.input.length;
     const g = glyphSize(result);
@@ -137,7 +141,8 @@ export function Scene({
       {beam.visible && view.showDeformed && (
         <BeamSolid
           result={result}
-          scale={scale.factor}
+          scale={s}
+          loadFraction={loadFraction}
           contour={contour}
           palette={palette}
           selected={selection === beam.id}
@@ -152,6 +157,7 @@ export function Scene({
         <BeamSolid
           result={result}
           scale={0}
+          loadFraction={1}
           contour={false}
           palette={palette}
           selected={selection === beam.id}
@@ -175,7 +181,8 @@ export function Scene({
       {load.visible && (
         <ForceArrow
           result={result}
-          scale={scale.factor}
+          scale={s}
+          loadFraction={loadFraction}
           deformed={view.showDeformed}
           palette={palette}
           selected={selection === load.id}
@@ -188,7 +195,7 @@ export function Scene({
       {view.showDimensions && beam.visible && (
         <Dimensions
           result={result}
-          scale={scale.factor}
+          scale={s}
           deformed={view.showDeformed}
           palette={palette}
         />

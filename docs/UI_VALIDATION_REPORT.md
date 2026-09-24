@@ -423,3 +423,32 @@ needs observation with actual users.
 Final verification: 35 Playwright flows, 131 unit tests, TypeScript, and the
 production Vite build passed. The regenerated selected-beam and phone Results
 screenshots document the revised first action.
+
+## 15. On-demand bending preview — 2026-09-24
+
+The static deformation previously changed instantly after an input edit. A
+one-shot **Bend** control beside the deformation scale now previews the load
+from 0 to 100% over 1.6 seconds. It can pause, resume, and replay. The beam,
+load arrow, F and δ labels, deflection dimension, and stress contour move
+together; the camera frames the final shape throughout. The contour legend
+reports the applied fraction's stress range. The persistent document and the
+result strip continue to show the full-load solved state.
+
+The control describes this as a *static load ramp*. It does not represent a
+mode shape, natural frequency, damping, or a time-domain structural response.
+It starts only on request, stops at the solved shape, and is disabled when the
+system prefers reduced motion or when there is no visible deformation. Model
+validity warnings continue to apply to the displayed target solution.
+
+Reviewed paused previews at 1024 × 768 in Model and Analyze and at 390 × 844
+on a phone viewport. The narrow Analyze viewport wraps the deformation
+control so it stays clear of the contour legend. Screenshots:
+`laptop-1024x768-09-bend-preview.png`,
+`laptop-1024x768-10-bend-analyze.png`, and
+`mobile-390x844-07-bend-preview.png`. The regenerated baseline captures show
+the control at rest in the existing workspaces.
+
+Final verification: all 38 Playwright flows passed, including play/pause/
+resume, reduced motion, mobile layout, and Analyze clearance. All 131 unit
+tests, TypeScript, and the production Vite build passed. Physical-device and
+manual screen-reader review remain outstanding.

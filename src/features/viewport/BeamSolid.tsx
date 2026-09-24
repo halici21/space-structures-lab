@@ -9,6 +9,7 @@ import type { ScenePalette } from "./palette";
 export function BeamSolid({
   result,
   scale,
+  loadFraction,
   contour,
   palette,
   selected,
@@ -18,6 +19,7 @@ export function BeamSolid({
 }: {
   result: CantileverResult;
   scale: number;
+  loadFraction: number;
   contour: boolean;
   palette: ScenePalette;
   selected: boolean;
@@ -47,14 +49,19 @@ export function BeamSolid({
     for (let i = 0; i < mesh.stress.length; i++) {
       if (contour && smax > 0) {
         const [r, g, b] = divergingColor(mesh.stress[i]! / smax);
-        attr.setXYZ(i, r, g, b);
+        attr.setXYZ(
+          i,
+          base.r + (r - base.r) * loadFraction,
+          base.g + (g - base.g) * loadFraction,
+          base.b + (b - base.b) * loadFraction,
+        );
       } else {
         attr.setXYZ(i, base.r, base.g, base.b);
       }
     }
     attr.needsUpdate = true;
     invalidate();
-  }, [geometry, mesh, contour, palette.beam, result.maxBendingStress, invalidate]);
+  }, [geometry, mesh, contour, palette.beam, result.maxBendingStress, loadFraction, invalidate]);
 
   useEffect(() => () => geometry.dispose(), [geometry]);
 

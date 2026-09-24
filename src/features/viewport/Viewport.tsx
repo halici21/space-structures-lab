@@ -4,8 +4,8 @@
  */
 import * as Popover from "@radix-ui/react-popover";
 import { Canvas } from "@react-three/fiber";
-import { Box, Home, Layers, Maximize, Scan } from "lucide-react";
-import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Box, Home, Layers, Maximize, Pause, Play, Scan } from "lucide-react";
+import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { formatNumber, formatQuantityText } from "@/core/units";
 import { Segmented } from "@/components/Segmented";
 import { Tex } from "@/components/Tex";
@@ -20,17 +20,18 @@ import { Scene } from "./Scene";
 import { displayScale, divergingColor, labelAnchors } from "./sceneMath";
 
 /** Text labels for the load and the dimensions, anchored in world space. */
-function useLabels(solved: SolvedDocument): LabelSpec[] {
+function useLabels(solved: SolvedDocument, loadFraction: number): LabelSpec[] {
   const view = useLab((s) => s.view);
   const system = useLab((s) => s.unitSystem);
   const selection = useLab((s) => s.selection);
   const { result, resolved } = solved;
   return useMemo(() => {
     const scale = displayScale(view.deformScale, result);
-    const anchors = labelAnchors(result, scale.factor, {
+    const anchors = labelAnchors(result, scale.factor * loadFraction, {
       deformed: view.showDeformed,
       showForce: resolved.load.visible,
       showDimensions: view.showDimensions && resolved.beam.visible,
+      forceLengthFraction: loadFraction,
     });
     const drawnNote = scale.exaggerated || scale.reduced ? `drawn ×${formatNumber(scale.factor, 3)}` : null;
     return anchors.map((a): LabelSpec => {
@@ -39,7 +40,7 @@ function useLabels(solved: SolvedDocument): LabelSpec[] {
           ...a,
           tone: "force",
           highlighted: selection === resolved.load.id,
-          content: `F = ${formatQuantityText(resolved.load.magnitude, "force", system)}`,
+          content: `F = ${formatQuantityText(resolved.load.magnitude * loadFraction, "force", system)}`,
         };
       if (a.id === "length") return { ...a, tone: "muted", content: `L = ${formatQuantityText(result.input.length, "span", system)}` };
       return {
@@ -47,13 +48,13 @@ function useLabels(solved: SolvedDocument): LabelSpec[] {
         tone: "default",
         content: (
           <>
-            δ = {formatQuantityText(result.tipDeflection, "displacement", system)}
+            δ = {formatQuantityText(result.tipDeflection * loadFraction, "displacement", system)}
             {drawnNote && <span className="ml-1.5 text-caution">{drawnNote}</span>}
           </>
         ),
       };
     });
-  }, [result, resolved, view.deformScale, view.showDeformed, view.showDimensions, system, selection]);
+  }, [result, resolved, view.deformScale, view.showDeformed, view.showDimensions, system, selection, loadFraction]);
 }
 
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -88,6 +89,54 @@ function useReducedMotion() {
   return reduced;
 }
 
+/** A one-shot quasi-static load ramp. The persistent engineering model never changes. */
+function useLoadRamp(resetKey: unknown, scaleMode: DeformScale, enabled: boolean, reducedMotion: boolean) {
+  const [phase, setPhase] = useState(1);
+  const [playing, setPlaying] = useState(false);
+  const phaseRef = useRef(1);
+
+  useLayoutEffect(() => {
+    phaseRef.current = 1;
+    setPhase(1);
+    setPlaying(false);
+  }, [resetKey, scaleMode, enabled, reducedMotion]);
+
+  useEffect(() => {
+    if (!playing || !enabled || reducedMotion) return;
+    const duration = 1600;
+    const start = performance.now() - phaseRef.current * duration;
+    let frame = 0;
+    let lastUpdate = 0;
+    const tick = (now: number) => {
+      const next = Math.min(1, (now - start) / duration);
+      if (now - lastUpdate >= 30 || next === 1) {
+        phaseRef.current = next;
+        setPhase(next);
+        lastUpdate = now;
+      }
+      if (next < 1) frame = requestAnimationFrame(tick);
+      else setPlaying(false);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [playing, enabled, reducedMotion]);
+
+  const toggle = () => {
+    if (!enabled || reducedMotion) return;
+    if (playing) {
+      setPlaying(false);
+    } else {
+      if (phaseRef.current >= 1) {
+        phaseRef.current = 0;
+        setPhase(0);
+      }
+      setPlaying(true);
+    }
+  };
+  const fraction = phase * phase * (3 - 2 * phase);
+  return { fraction, playing, toggle };
+}
+
 export default function Viewport({
   solved,
   compact = false,
@@ -102,12 +151,15 @@ export default function Viewport({
 }) {
   const theme = useLab((s) => s.theme);
   const view = useLab((s) => s.view);
+  const workspace = useLab((s) => s.workspace);
   const select = useLab((s) => s.select);
   const palette = useScenePalette(theme);
   const reduced = useReducedMotion();
+  const animationEnabled = view.showDeformed && solved.resolved.beam.visible && solved.result.tipDeflection > 0;
+  const ramp = useLoadRamp(solved.result, view.deformScale, animationEnabled, reduced);
   const down = useRef<{ x: number; y: number } | null>(null);
   const labelNodes: LabelNodes = useRef({});
-  const labels = useLabels(solved);
+  const labels = useLabels(solved, ramp.fraction);
   const hoveringObject = useLab((s) => s.hover !== null);
   const [pointerInside, setPointerInside] = useState(false);
   const system = useLab((s) => s.unitSystem);
@@ -116,14 +168,20 @@ export default function Viewport({
     `3D view of ${solved.resolved.beam.name}: cantilever, ` +
     `${formatQuantityText(solved.result.input.length, "span", system)} long, ` +
     `tip deflection ${formatQuantityText(solved.result.tipDeflection, "displacement", system)}` +
-    (scale.exaggerated || scale.reduced ? `, drawn at ×${formatNumber(scale.factor, 3)}.` : ", drawn at true scale.");
+    (scale.exaggerated || scale.reduced ? `, drawn at ×${formatNumber(scale.factor, 3)}.` : ", drawn at true scale.") +
+    (ramp.fraction < 1 ? ` Quasi-static load ramp preview: ${Math.round(ramp.fraction * 100)}% applied.` : "");
   const guide = useLab((s) => s.onboarding);
   const box = useRef<HTMLDivElement>(null);
   const [short, setShort] = useState(false);
+  const [narrow, setNarrow] = useState(false);
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => e && setShort(e.contentRect.height < 460));
+    const ro = new ResizeObserver(([e]) => {
+      if (!e) return;
+      setShort(e.contentRect.height < 460);
+      setNarrow(e.contentRect.width < 900);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -141,7 +199,8 @@ export default function Viewport({
     <div
       ref={box}
       className="relative h-full w-full overflow-hidden bg-viewport"
-      data-testid="viewport"
+      data-testid="viewport-scene"
+      data-ramp-progress={ramp.fraction.toFixed(3)}
       onPointerDown={(e) => {
         down.current = e.target instanceof HTMLCanvasElement ? { x: e.clientX, y: e.clientY } : null;
       }}
@@ -171,6 +230,7 @@ export default function Viewport({
             palette={palette}
             autoFrame={view.autoFrame}
             reducedMotion={reduced}
+            loadFraction={ramp.fraction}
             labels={labels}
             labelNodes={labelNodes}
             insets={insets}
@@ -181,8 +241,15 @@ export default function Viewport({
 
       {guideOverlay && <Onboarding variant="overlay" forceCollapsed={short} onShowInspector={onShowInspector} />}
       <ViewTools compact={compact} />
-      <DeformationBar solved={solved} compact={compact} />
-      <ContourLegend solved={solved} compact={compact} />
+      <DeformationBar
+        solved={solved}
+        compact={compact}
+        ramp={ramp}
+        animationEnabled={animationEnabled}
+        reducedMotion={reduced}
+        constrainForLegend={narrow && contourEnabled(view, workspace) && view.showDeformed}
+      />
+      <ContourLegend solved={solved} compact={compact} loadFraction={ramp.fraction} />
     </div>
   );
 }
@@ -294,7 +361,21 @@ const SCALE_OPTIONS: { value: DeformScale; label: string }[] = [
   { value: "auto", label: "Auto" },
 ];
 
-function DeformationBar({ solved, compact }: { solved: SolvedDocument; compact: boolean }) {
+function DeformationBar({
+  solved,
+  compact,
+  ramp,
+  animationEnabled,
+  reducedMotion,
+  constrainForLegend,
+}: {
+  solved: SolvedDocument;
+  compact: boolean;
+  ramp: { fraction: number; playing: boolean; toggle(): void };
+  animationEnabled: boolean;
+  reducedMotion: boolean;
+  constrainForLegend: boolean;
+}) {
   const view = useLab((s) => s.view);
   const setView = useLab((s) => s.setView);
   const system = useLab((s) => s.unitSystem);
@@ -326,10 +407,12 @@ function DeformationBar({ solved, compact }: { solved: SolvedDocument; compact: 
 
   return (
     <div
+      data-testid="deformation-bar"
       className={
         "absolute bottom-2 left-2 flex items-center gap-2 rounded-md border border-line bg-panel/90 py-1 pr-1.5 pl-2.5 backdrop-blur-sm " +
-        (compact ? "max-w-[calc(100%-16px)]" : "")
+        (compact ? "max-w-[calc(100%-16px)]" : constrainForLegend ? "flex-wrap" : "")
       }
+      style={constrainForLegend && !compact ? { maxWidth: "calc(100% - 232px)" } : undefined}
     >
       {!compact && <span className="caps">Deformation</span>}
       <Segmented
@@ -340,18 +423,33 @@ function DeformationBar({ solved, compact }: { solved: SolvedDocument; compact: 
         testId="deform-scale"
       />
       {badge}
+      <Tip content={reducedMotion ? "Motion is disabled by your system preference" : "Preview a quasi-static load ramp; this is not vibration analysis"}>
+        <button
+          className="btn btn-ghost h-[26px] shrink-0 gap-1 px-2"
+          aria-label={ramp.playing ? "Pause static bending preview" : ramp.fraction < 1 ? "Resume static bending preview" : "Play static bending preview"}
+          aria-pressed={ramp.playing}
+          disabled={!animationEnabled || reducedMotion}
+          onClick={ramp.toggle}
+          data-testid="bend-animation-toggle"
+        >
+          {ramp.playing ? <Pause size={13} aria-hidden /> : <Play size={13} aria-hidden />}
+          {!compact && (ramp.playing ? "Pause" : ramp.fraction < 1 ? "Resume" : "Bend")}
+          {ramp.fraction < 1 && <span className="num">{Math.round(ramp.fraction * 100)}%</span>}
+        </button>
+      </Tip>
+      {ramp.fraction < 1 && !compact && <span className="text-[11px] text-muted">Static load ramp</span>}
     </div>
   );
 }
 
 // ------------------------------------------------------------- contour legend
 
-function ContourLegend({ solved, compact }: { solved: SolvedDocument; compact: boolean }) {
+function ContourLegend({ solved, compact, loadFraction }: { solved: SolvedDocument; compact: boolean; loadFraction: number }) {
   const view = useLab((s) => s.view);
   const workspace = useLab((s) => s.workspace);
   const system = useLab((s) => s.unitSystem);
   if (!contourEnabled(view, workspace) || !view.showDeformed || compact) return null;
-  const smax = solved.result.maxBendingStress;
+  const smax = solved.result.maxBendingStress * loadFraction;
   const stops = [-1, -0.5, 0, 0.5, 1]
     .map((t) => {
       const [r, g, b] = divergingColor(t);
